@@ -9,7 +9,7 @@
 
 The system is composed of two interacting neural engines:
 1.  **AgriFlow Physics Engine (The "Twin"):** A Deep Reinforcement Learning (DRL) agent that simulates and optimizes physical fleet logistics in real-time.
-2.  **AgriAlpha Signal Engine (The "Predator"):** A Predictive Model that ingests satellite/weather data + the *output* of the Physics Engine to predict commodity price movements.
+2.  **AgriAlpha Signal Engine (The "Predator"):** A Gradient Boosting Machine that ingests satellite/weather data + the *output* of the Physics Engine to predict commodity price movements.
 
 ### 🧠 Engine 1: The Logistics RL Agent (Detailed Mechanics)
 The core of AgriFlow is a **Policy Gradient Agent (REINFORCE Algorithm)** trained to master the *Stochastic Vehicle Routing Problem (SVRP)*.
@@ -35,36 +35,26 @@ To prevent "hallucinations" (assigning routes to empty farms):
 *   **Source Mask:** We explicitly zero out logits for Farms with $< 100$ gallons. The Agent *cannot* pick them.
 *   **Destination Mask:** We zero out logits for unconnected nodes (graph topology enforcement).
 
-#### **4. The Reward Signal (Training)**
-The agent was trained over **50,000 Episodes** using this reward function:
-$$ R = (\text{Revenue} \times \alpha) - (\text{Distance} \times \beta) - (\text{Spoilage} \times \gamma) $$
-*   **Critical Insight:** During training, we injected "Chaos" (Random Traffic Jams). The agent learned that *taking a longer route* (low $\beta$) is better than risking a traffic jam that causes spoilage (ultra-high $\gamma$).
-*   **Result:** It outperforms linear solvers (like SAP) because linear solvers optimize for Distance, whereas AgriFlow optimizes for **Risk-Adjusted Survival**.
-
----
-
-## 📈 Engine 2: The Alpha Predictor (Detailed Mechanics)
+### 📈 Engine 2: The Alpha Predictor (Gradient Boosting V2)
 The Alpha Engine does not just look at price history. It looks at **Physical Causality**.
 
 #### **1. Multi-Source Ingestion**
-It aggregates 12+ distinct data streams:
+It aggregates 15+ distinct data streams:
 *   **Satellite:** Soil Moisture, Vegetation Index (VPD), Cloud Cover (Visibility).
 *   **Weather Reanalysis:** Snow Accumulation, Wind Gusts.
 *   **Macro:** Crude Oil (WTI), 10Y Treasury Yields.
+*   **Technicals:** RSI (14-day), SMA (10-day, 30-day), Volatility.
 
-#### **2. The "Traffic Chaos" Derivative**
-Before predicting price, we calculate a **Derived Feature**:
-*   `Traffic_Stress_Index = (Snow_3Day_Sum * 2.0) + (Rain_Intensity) + (Wind_Gust_Risk)`
-*   This feature proxies the *probability of supply chain failure* in the Midwest.
-
-#### **3. The Prediction Model (Random Forest)**
-We use a **Walk-Forward Validation** approach (No look-ahead bias).
-*   **Training:** On Day $T$, we train on all history $H_{0...T-1}$.
-*   **Features:** `[Price_Momentum, Traffic_Stress_Index, Oil_Cost, Soil_Moisture]`
+#### **2. The Prediction Model (XGBoost Logic)**
+We use a **Gradient Boosting Regressor** (sklearn implementation) which outperforms Random Forests on sequential financial data.
+*   **Training Window:** 365 Days (Rolling).
+*   **Features:** `[RSI_14, SMA_Cross, Traffic_Stress_Index, Oil_Cost, Soil_Moisture, Accident_Risk]`
 *   **Target:** Day $T$ Closing Price.
 
-#### **Why It Works?**
-Markets are efficient at pricing *known* news. They are inefficient at pricing **hyper-local physical disruptions** (e.g., "The I-80 bridge is icy"). AgriFlow detects the ice (via Sat/Weather data), predicts the logistics failure, and generates a **Short/Long Signal** before the market reacts to the shortage.
+#### **3. The "Traffic Chaos" Derivative**
+Before predicting price, we calculate a **Derived Feature**:
+*   `Traffic_Stress_Index = (Snow_3Day_Sum * 2.0) + (Rain_Intensity) + (Wind_Gust_Risk)`
+*   This feature proxies the *probability of supply chain failure* in the Midwest. Markets often physically fail before they financially fail.
 
 ---
 
@@ -74,6 +64,7 @@ Markets are efficient at pricing *known* news. They are inefficient at pricing *
 3.  **Modes:**
     *   **Logistics Twin:** Run the RL simulation to see "Cost Reduction" vs. Legacy systems.
     *   **Alpha Predator:** Use the "Time Machine" to backtest predictions against historical satellite data.
+    *   **System Internals:** animated visualization of the data pipeline.
 
 ---
-**Tech Stack:** Python 3.9, PyTorch (RL), Scikit-Learn (Alpha), Flask (API), TailwindCSS (UI), Open-Meteo (Satellite Data).
+**Tech Stack:** Python 3.9, PyTorch (RL), GradientBoosting (Alpha), Flask (API), TailwindCSS (UI), Open-Meteo (Satellite Data), YFinance (Macro).
