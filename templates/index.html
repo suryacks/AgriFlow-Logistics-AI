@@ -1,0 +1,217 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgriFlow Dashboard</title>
+    <!-- Tailwind CSS (via CDN) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Custom Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #0f172a; color: white; }
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+        }
+        .gradient-text {
+            background: linear-gradient(to right, #4ade80, #22d3ee);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+    </style>
+</head>
+<body class="h-screen flex flex-col items-center justify-center overflow-hidden bg-[url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2672&auto=format&fit=crop')] bg-cover bg-center">
+    
+    <!-- Dark Overlay -->
+    <div class="absolute inset-0 bg-slate-900/90 z-0"></div>
+
+    <!-- Main Container -->
+    <div class="relative z-10 w-full max-w-6xl p-6 grid grid-cols-12 gap-6 h-[90vh]">
+        
+        <!-- Sidebar Controls -->
+        <div class="glass-panel col-span-3 p-6 flex flex-col justify-between">
+            <div>
+                <h1 class="text-3xl font-bold mb-2">AgriFlow <span class="text-xs align-top text-green-400">AI</span></h1>
+                <p class="text-slate-400 text-sm mb-8">Autonomous Logistics Engine</p>
+                
+                <!-- Controls -->
+                <div class="space-y-6">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-500 mb-2">Fleet Size</label>
+                        <input type="range" id="fleetSize" min="5" max="200" value="50" class="w-full accent-green-500">
+                        <div class="flex justify-between text-xs text-slate-300">
+                            <span>5</span>
+                            <span id="fleetVal">50 Trucks</span>
+                            <span>200</span>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-500 mb-2">Traffic Chaos</label>
+                        <input type="range" id="trafficProb" min="0" max="0.5" step="0.05" value="0.1" class="w-full accent-red-500">
+                        <div class="flex justify-between text-xs text-slate-300">
+                            <span>Clean</span>
+                            <span id="trafficVal">10% Jam Risk</span>
+                            <span>Gridlock</span>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-500 mb-2">Heat Wave (Spoilage)</label>
+                        <input type="range" id="heatFactor" min="0" max="1.0" step="0.1" value="0.5" class="w-full accent-yellow-500">
+                        <div class="flex justify-between text-xs text-slate-300">
+                            <span>Cold</span>
+                            <span id="heatVal">50% Heat</span>
+                            <span>Inferno</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <button onclick="runSimulation()" class="w-full py-4 bg-gradient-to-r from-green-500 to-emerald-600 rounded-xl font-bold text-white shadow-lg hover:shadow-green-500/25 transition transform hover:scale-105">
+                RUN SIMULATION
+            </button>
+        </div>
+
+        <!-- Dashboard Area -->
+        <div class="col-span-9 grid grid-rows-2 gap-6">
+            
+            <!-- Metrics Row -->
+            <div class="grid grid-cols-3 gap-6">
+                <!-- SAP Card -->
+                <div class="glass-panel p-6 flex flex-col justify-center items-center border-l-4 border-red-500">
+                    <h3 class="text-slate-400 text-sm font-semibold uppercase">Traditional ERP</h3>
+                    <div id="sapProfit" class="text-3xl font-bold text-red-400 mt-2">$0</div>
+                    <span class="text-xs text-slate-500 mt-1">Static Optimization</span>
+                </div>
+
+                <!-- AgriFlow Card -->
+                <div class="glass-panel p-6 flex flex-col justify-center items-center border-l-4 border-green-500 relative overflow-hidden">
+                    <div class="absolute inset-0 bg-green-500/5"></div>
+                    <img src="https://img.icons8.com/color/48/artificial-intelligence.png" class="w-8 h-8 opacity-20 absolute top-4 right-4">
+                    <h3 class="text-green-400 text-sm font-semibold uppercase">AgriFlow AI</h3>
+                    <div id="aiProfit" class="text-4xl font-bold text-white mt-2">$0</div>
+                    <span class="text-xs text-slate-400 mt-1">Dynamic RL Swarm</span>
+                </div>
+
+                <!-- Gain Card -->
+                <div class="glass-panel p-6 flex flex-col justify-center items-center bg-gradient-to-br from-slate-800 to-slate-900">
+                    <h3 class="text-slate-400 text-sm font-semibold uppercase">Efficiency Gain</h3>
+                    <div id="gainPercent" class="text-3xl font-bold gradient-text mt-2">0%</div>
+                    <span class="text-xs text-slate-500 mt-1">AI Outperformance</span>
+                </div>
+            </div>
+
+            <!-- Chart Area -->
+            <div class="glass-panel p-6 relative">
+                <canvas id="profitChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Update Slider Labels
+        document.getElementById('fleetSize').oninput = function() { document.getElementById('fleetVal').innerText = this.value + " Trucks"; }
+        document.getElementById('trafficProb').oninput = function() { document.getElementById('trafficVal').innerText = (this.value * 100).toFixed(0) + "% Jam Risk"; }
+        document.getElementById('heatFactor').oninput = function() { document.getElementById('heatVal').innerText = (this.value * 100).toFixed(0) + "% Heat"; }
+
+        // Chart Setup
+        const ctx = document.getElementById('profitChart').getContext('2d');
+        let profitChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: 'AgriFlow AI',
+                    borderColor: '#4ade80',
+                    backgroundColor: 'rgba(74, 222, 128, 0.1)',
+                    borderWidth: 3,
+                    tension: 0.4,
+                    fill: true,
+                    data: []
+                }, {
+                    label: 'Traditional ERP',
+                    borderColor: '#f87171',
+                    borderWidth: 2,
+                    borderDash: [5, 5],
+                    tension: 0.4,
+                    data: []
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'top', labels: { color: '#cbd5e1' } }
+                },
+                scales: {
+                    y: { grid: { color: '#334155' }, ticks: { color: '#94a3b8' } },
+                    x: { display: false } // Hide steps for cleanness
+                }
+            }
+        });
+
+        async function runSimulation() {
+            // Get Values
+            const fleet = document.getElementById('fleetSize').value;
+            const traffic = document.getElementById('trafficProb').value;
+            const heat = document.getElementById('heatFactor').value;
+
+            // Loading State (button)
+            const btn = document.querySelector('button');
+            const originalText = btn.innerText;
+            btn.innerText = "RUNNING DIGITAL TWIN...";
+            btn.disabled = true;
+            btn.classList.add('opacity-75', 'cursor-not-allowed');
+
+            try {
+                const response = await fetch('/run_simulation', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ fleet_size: fleet, traffic_prob: traffic, heat_factor: heat })
+                });
+                
+                const data = await response.json();
+
+                // Update UI
+                animateValue("sapProfit", data.profit_sap);
+                animateValue("aiProfit", data.profit_ai);
+                
+                let gain = 0;
+                if (data.profit_sap != 0) {
+                     gain = ((data.profit_ai - data.profit_sap) / Math.abs(data.profit_sap)) * 100;
+                }
+                document.getElementById('gainPercent').innerText = (gain > 0 ? "+" : "") + gain.toFixed(1) + "%";
+                if (gain > 0) document.getElementById('gainPercent').classList.remove("text-red-400");
+                else document.getElementById('gainPercent').classList.add("text-red-400");
+
+                // Update Chart
+                profitChart.data.labels = data.timeline.x;
+                profitChart.data.datasets[0].data = data.timeline.y_ai;
+                profitChart.data.datasets[1].data = data.timeline.y_sap;
+                profitChart.update();
+
+            } catch (error) {
+                console.error("Simulation Failed:", error);
+                alert("Simulation failed. Check backend logs.");
+            }
+
+            btn.innerText = originalText;
+            btn.disabled = false;
+            btn.classList.remove('opacity-75', 'cursor-not-allowed');
+        }
+
+        function animateValue(id, value) {
+            const obj = document.getElementById(id);
+            obj.innerText = "$" + value.toLocaleString();
+            // TODO: Add count-up animation later
+        }
+    </script>
+</body>
+</html>
