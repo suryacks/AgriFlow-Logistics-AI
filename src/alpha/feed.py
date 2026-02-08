@@ -17,9 +17,12 @@ class MarketFeed:
         """
         Fetches 'Deep' Environmental Data (10+ Parameters).
         Source: Open-Meteo Archive (Satellite/Reanalysis).
+        Try -> Fallback -> Fail Gracefully.
         """
         url = "https://archive-api.open-meteo.com/v1/archive"
-        params = {
+        
+        # Deep Param Set (12 Factors)
+        full_params = {
             "latitude": lat,
             "longitude": lon,
             "start_date": start_date,
@@ -32,12 +35,18 @@ class MarketFeed:
             "timezone": "America/Chicago"
         }
         
-        try:
-            responses = self.openmeteo.weather_api(url, params=params)
-            response = responses[0]
+        # Fallback Param Set (Critical Factors Only)
+        basic_params = {
+            "latitude": lat,
+            "longitude": lon,
+            "start_date": start_date,
+            "end_date": end_date,
+            "hourly": ["temperature_2m", "rain", "snowfall", "wind_gusts_10m"],
+            "timezone": "America/Chicago"
+        }
+        
+        def process_response(response, is_basic=False):
             hourly = response.Hourly()
-            
-            def get_col(idx): return hourly.Variables(idx).ValuesAsNumpy()
             
             data = {"date": pd.date_range(
                 start=pd.to_datetime(hourly.Time(), unit="s", utc=True),
@@ -46,22 +55,41 @@ class MarketFeed:
                 inclusive="left"
             )}
             
-            # 12-Factor Environmental Vector
-            data["temp"] = get_col(0)
-            data["humidity"] = get_col(1)
-            data["precip"] = get_col(2)
-            data["rain"] = get_col(3)
-            data["snow"] = get_col(4)      # TRAFFIC FACTOR
-            data["clouds"] = get_col(6)    # VISIBILITY/SAT FACTOR
-            data["wind_spd"] = get_col(7)
-            data["wind_gust"] = get_col(8) # ROLLOVER/POLICE CLOSURE FACTOR
-            data["soil_temp"] = get_col(9)
-            data["soil_moist"] = get_col(10) # HARVEST FACTOR
-            data["vpd"] = get_col(11)        # CROP STRESS FACTOR
+            def get_col(idx): 
+                vals = hourly.Variables(idx).ValuesAsNumpy()
+                if len(vals) != len(data["date"]):
+                     # Pad or trunc if length mismatch (rare API quirk)
+                     return pd.Series(vals).reindex(range(len(data["date"])), fill_value=0).values
+                return vals
             
+            if not is_basic:
+                # 12-Factor Environmental Vector
+                data["temp"] = get_col(0)
+                data["humidity"] = get_col(1)
+                data["precip"] = get_col(2)
+                data["rain"] = get_col(3)
+                data["snow"] = get_col(4)      # TRAFFIC FACTOR
+                data["clouds"] = get_col(6)    # VISIBILITY/SAT FACTOR
+                data["wind_spd"] = get_col(7)
+                data["wind_gust"] = get_col(8) # ROLLOVER/POLICE CLOSURE FACTOR
+                data["soil_temp"] = get_col(9)
+                data["soil_moist"] = get_col(10) # HARVEST FACTOR
+                data["vpd"] = get_col(11)        # CROP STRESS FACTOR
+            else:
+                # Basic Fallback (Fill missing with defaults)
+                data["temp"] = get_col(0)
+                data["rain"] = get_col(1)
+                data["snow"] = get_col(2)
+                data["wind_gust"] = get_col(3)
+                # Fill Missing
+                zeros = [0.0] * len(data["date"])
+                data["humidity"] = zeros; data["precip"] = data["rain"] # Approx
+                data["clouds"] = zeros; data["wind_spd"] = zeros
+                data["soil_temp"] = zeros; data["soil_moist"] = zeros; data["vpd"] = zeros
+
             df = pd.DataFrame(data=data)
             
-            # Aggregate to Daily (Max Risk / Mean Condition)
+            # Aggregate to Daily
             df['date'] = df['date'].dt.date
             df_daily = df.groupby('date').agg({
                 'temp': 'min', 'humidity': 'mean', 'precip': 'sum',
@@ -72,10 +100,22 @@ class MarketFeed:
             
             df_daily['date'] = pd.to_datetime(df_daily['date'])
             return df_daily
+
+        try:
+            # Attempt 1: Full Fidelity
+            responses = self.openmeteo.weather_api(url, params=full_params)
+            return process_response(responses[0], is_basic=False)
             
         except Exception as e:
-            print(f"Deep Weather API Error: {e}")
-            return pd.DataFrame()
+            print(f"Deep Weather API Failed ({e}). Attempting Fallback...")
+            try:
+                # Attempt 2: minimal vital signs
+                responses = self.openmeteo.weather_api(url, params=basic_params)
+                print("Fallback Weather Data Retrieved.")
+                return process_response(responses[0], is_basic=True)
+            except Exception as e2:
+                print(f"CRITICAL: All Weather feeds failed. {e2}")
+                return pd.DataFrame()
 
     def get_market_data(self, ticker="DC=F", start_date="2024-01-01", end_date="2024-03-31"):
         """

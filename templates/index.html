@@ -424,7 +424,8 @@
                 document.getElementById('resActMove').innerText = "ACTUAL: " + data.actual_move;
 
                 // New Sat Data Fields
-                document.getElementById('resSoil').innerText = data.satellite_data.soil_moisture + " (Idx)";
+                const soil = data.satellite_data.soil_moisture;
+                document.getElementById('resSoil').innerText = (soil === 0 ? "N/A (Signal Lost)" : soil + " (Idx)");
                 document.getElementById('resTraffic').innerText = data.satellite_data.traffic_stress_index + " (Chaos)";
                 document.getElementById('resAccident').innerText = data.satellite_data.accident_risk_score + " (Risk)";
                 document.getElementById('resOil').innerText = "$" + data.macro_data.oil_price;
