@@ -48,8 +48,9 @@ def generate_alpha():
     data = request.json
     start = data.get('start_date', '2024-01-01')
     end = data.get('end_date', '2024-03-31')
+    comm = data.get('commodity', 'DC=F')
     
-    buf = alpha_plotter.generate_correlation_chart(start, end)
+    buf = alpha_plotter.generate_correlation_chart(start, end, ticker=comm)
     
     if buf:
         return send_file(buf, mimetype='image/png')

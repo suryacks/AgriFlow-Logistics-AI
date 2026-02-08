@@ -153,4 +153,38 @@ class SimulationEngine:
             'AgriFlow (AI)': agri_cum_profit[:min_len]
         })
         
-        return df, current_sap_profit, current_agri_profit
+    def obtain_stress_score(self, traffic_intensity, heat_intensity):
+        """
+        Runs the AgileFlow RL Agent on a 'Digital Twin' of the specified weather conditions.
+        Returns a 'Logistics Stress Score' (0-100).
+        
+        0 = Smooth Sailing
+        100 = Total Supply Chain Collapse
+        """
+        # 1. Run Baseline (Perfect Conditions)
+        _, base_sap, base_ai = self.run_simulation(fleet_size_input=50, enable_traffic=False, heat_start=0.0, traffic_prob=0.0, simulation_steps=100)
+        
+        # 2. Run Stress Scenario
+        # Map inputs: traffic_intensity (0-1) -> traffic_prob (0.0-0.5)
+        # heat_intensity (0-1) -> heat_start (0.0-1.0)
+        t_prob = traffic_intensity * 0.5
+        h_start = heat_intensity
+        
+        _, stress_sap, stress_ai = self.run_simulation(fleet_size_input=50, enable_traffic=True, heat_start=h_start, traffic_prob=t_prob, simulation_steps=100)
+        
+        # 3. Calculate "Disruption"
+        # We compare how much the Traditional System FAILED.
+        # This is the "Opportunity for Arbitrage".
+        # If Traditional Profit crashes, prices will spike.
+        
+        # Protect div/0
+        if base_sap == 0: base_sap = 1
+        
+        drop = (base_sap - stress_sap) / abs(base_sap)
+        
+        # Normalize to 0-100 score
+        # A drop of 150% (negative profit) = 100 score
+        # A drop of 0% = 0 score
+        score = min(max(drop * 66, 0), 100)
+        
+        return score, stress_ai, stress_sap

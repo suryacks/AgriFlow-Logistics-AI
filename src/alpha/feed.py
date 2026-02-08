@@ -59,26 +59,49 @@ class MarketFeed:
 
     def get_market_data(self, ticker="DC=F", start_date="2024-01-01", end_date="2024-03-31"):
         """
-        Fetches Daily Futures Price (Class III Milk).
+        Fetches Daily Futures Price.
+        Supported:
+        - DC=F: Class III Milk
+        - LE=F: Live Cattle
+        - ZC=F: Corn
+        - ZS=F: Soybean
+        - HE=F: Lean Hogs
         """
-        df_market = yf.download(ticker, start=start_date, end=end_date)
-        if df_market.empty:
-            # Fallback for testing on weekends/holidays if yfinance fails
-            # Or use substitute like 'LE=F' (Live Cattle) if Milk is illiquid
-            print(f"Warning: No data for {ticker}. Trying Live Cattle (LE=F)...")
-            df_market = yf.download("LE=F", start=start_date, end=end_date)
+        try:
+            df_market = yf.download(ticker, start=start_date, end=end_date, progress=False)
+            if df_market.empty:
+                print(f"Warning: No data for {ticker}.")
+                return pd.DataFrame(columns=['date', 'price'])
+                
+            df_market = df_market.reset_index()
+            # Ensure col names are standard (yfinance sometimes returns MultiIndex)
+            if isinstance(df_market.columns, pd.MultiIndex):
+                # Flatten: Date is index level, Close is column
+                # Depending on version: sometimes ('Close', 'DC=F')
+                try:
+                    df_market.columns = [c[0] if isinstance(c, tuple) else c for c in df_market.columns]
+                except:
+                    pass
             
-        df_market = df_market.reset_index()
-        # Ensure col names are standard (yfinance sometimes returns MultiIndex)
-        if isinstance(df_market.columns, pd.MultiIndex):
-            df_market.columns = df_market.columns.get_level_values(0)
+            # Normalize Columns
+            # Look for 'Date' and 'Close'
+            df_market.rename(columns={'Date': 'date', 'Close': 'price', 'Adj Close': 'price'}, inplace=True)
             
-        # Clean
-        df_market = df_market[['Date', 'Close']]
-        df_market.columns = ['date', 'price']
-        df_market['date'] = pd.to_datetime(df_market['date'])
-        
-        return df_market
+            # Fallback if 'price' not found (weird yfinance format)
+            if 'price' not in df_market.columns:
+                 # Check if ticker name is a column
+                 if ticker in df_market.columns:
+                     df_market.rename(columns={ticker: 'price'}, inplace=True)
+                 else:
+                     # Take the second column (usually Close)
+                     df_market['price'] = df_market.iloc[:, 1]
+            
+            df_market = df_market[['date', 'price']]
+            df_market['date'] = pd.to_datetime(df_market['date'])
+            return df_market
+        except Exception as e:
+            print(f"Market Data Error: {e}")
+            return pd.DataFrame(columns=['date', 'price'])
 
     def merge_data(self, df_weather, df_market):
         """
