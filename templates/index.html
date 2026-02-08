@@ -46,7 +46,7 @@
             overflow: hidden;
             pointer-events: none;
             color: transparent !important;
-            /* Hide text */
+            /* Hide original text */
         }
 
         .loading-btn::after {
@@ -59,10 +59,12 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #000;
-            font-weight: bold;
-            font-size: 10px;
+            color: #ffffff;
+            font-weight: 800;
+            font-size: 11px;
+            letter-spacing: 1px;
             z-index: 2;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
         }
 
         .loading-btn::before {
@@ -71,7 +73,8 @@
             top: 0;
             left: 0;
             height: 100%;
-            background: linear-gradient(90deg, #22d3ee, #4ade80);
+            /* Cleaner Gradient */
+            background: linear-gradient(90deg, #059669, #10b981);
             width: 0%;
             animation: loadBar 3s ease-in-out forwards;
             z-index: 1;
@@ -227,13 +230,22 @@
                     <h3 class="text-xs font-bold text-white mb-3">Analysis Mode</h3>
                     <div class="mb-6">
                         <label class="text-[10px] text-slate-500 uppercase">Time Machine (Predict One Event)</label>
-                        <div class="flex space-x-2 mt-1">
+                        <div class="flex flex-col space-y-2 mt-1">
                             <input type="date" id="predictDate" value="2024-01-16"
-                                class="bg-slate-900 border border-slate-700 rounded p-2 text-xs w-full">
+                                class="bg-slate-900 border border-slate-700 rounded p-2 text-xs w-full text-white">
                             <button onclick="runPrediction()"
-                                class="px-3 bg-cyan-600 text-black text-xs font-bold rounded hover:bg-cyan-500"><i
-                                    class="fas fa-bolt"></i></button>
+                                class="w-full py-2 bg-cyan-600 hover:bg-cyan-500 text-black text-xs font-bold rounded shadow transition-all flex justify-center items-center">
+                                <i class="fas fa-bolt mr-2"></i> GENERATE PREDICTION
+                            </button>
                         </div>
+                    </div>
+                    <div>
+                        <label class="text-[10px] text-slate-500 uppercase">Quarterly Simulation</label>
+                        <button id="btnBacktest" onclick="runBacktest()"
+                            class="w-full mt-2 py-3 border border-slate-700 hover:border-cyan-500 text-slate-300 hover:text-white text-xs font-bold rounded transition-all flex justify-center items-center space-x-2 relative">
+                            <span>RUN Q1 2024 BACKTEST</span>
+                            <i class="fas fa-play"></i>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -278,141 +290,167 @@
 
             <!-- VIEW: ALPHA (Split Views) -->
             <div id="viewAlpha" class="h-full hidden grid grid-cols-12 gap-6 overflow-y-auto">
-                <!-- Left: Single Event -->
-                <div class="col-span-4 flex flex-col space-y-4">
-                    <div class="glass-dark p-6 relative overflow-hidden h-[300px]">
-                        <div class="absolute top-0 right-0 p-4 opacity-10"><i class="fas fa-microchip text-6xl"></i>
+                <!-- Left: Single Event (Expandable) -->
+                <div id="cardSingleEvent"
+                    class="col-span-4 flex flex-col space-y-4 h-[600px] transition-all duration-500 ease-in-out z-40">
+                    <div class="glass-dark flex-1 p-6 relative flex flex-col overflow-hidden">
+
+                        <!-- Header / Controls -->
+                        <div class="flex justify-between items-start mb-4 border-b border-slate-700 pb-2">
+                            <h3 class="text-sm font-bold text-white uppercase">Market Event Prediction</h3>
+                            <button onclick="toggleFullscreen()"
+                                class="text-slate-500 hover:text-white transition-colors">
+                                <i class="fas fa-expand text-lg"></i>
+                            </button>
                         </div>
-                        <h3 class="text-sm font-bold text-white uppercase mb-4 border-b border-slate-700 pb-2">Single
-                            Event Prediction</h3>
-                        <div id="predResult" class="hidden space-y-4">
-                            <div class="flex justify-between items-end">
+
+                        <!-- Results -->
+                        <div id="predResult" class="hidden flex-1 flex flex-col space-y-4">
+                            <!-- Top: Date & Verdict -->
+                            <div class="flex justify-between items-center mb-2">
                                 <div>
-                                    <div class="text-[10px] text-slate-500 uppercase">Target Date</div>
-                                    <div id="resDate" class="text-md font-mono text-white">2024-01-15</div>
+                                    <div class="text-[10px] text-slate-500 uppercase tracking-widest">Target Date</div>
+                                    <div id="resDate" class="text-lg font-mono text-white font-bold">--</div>
                                 </div>
-                                <div class="text-right">
-                                    <div id="resVerdict"
-                                        class="px-2 py-1 bg-green-500 text-black font-bold text-[10px] rounded uppercase">
-                                        CORRECT</div>
-                                </div>
-                            </div>
-                            <div class="grid grid-cols-2 gap-2">
-                                <div class="bg-slate-800/50 p-2 rounded">
-                                    <div class="text-[8px] text-slate-400">PREDICTED</div>
-                                    <div id="resPred" class="text-sm font-bold text-cyan-400">$17.40</div>
-                                </div>
-                                <div class="bg-slate-800/50 p-2 rounded">
-                                    <div class="text-[8px] text-slate-400">ACTUAL</div>
-                                    <div id="resAct" class="text-sm font-bold text-white">$17.42</div>
+                                <div id="resVerdict"
+                                    class="px-3 py-1 bg-green-500 text-black font-extrabold text-xs rounded uppercase shadow-lg shadow-green-500/20">
+                                    CORRECT
                                 </div>
                             </div>
-                            <div class="space-y-1 mt-2 pt-2 border-t border-slate-800">
-                                <h4 class="text-[10px] text-slate-500 uppercase font-bold text-center mb-1">Logistics &
-                                    Weather</h4>
-                                <div class="grid grid-cols-2 gap-1 text-[10px]">
-                                    <div class="flex justify-between border-b border-slate-800/50 p-1"><span
-                                            class="text-slate-500">Logistics Stress</span><span id="resTraffic"
-                                            class="text-white">--</span></div>
-                                    <div class="flex justify-between border-b border-slate-800/50 p-1"><span
+
+                            <!-- Middle: Prices & Error -->
+                            <div class="grid grid-cols-2 gap-3">
+                                <div class="bg-slate-800/80 p-3 rounded-lg border border-slate-700">
+                                    <div class="text-[9px] text-cyan-400 font-bold uppercase mb-1">AI Prediction</div>
+                                    <div id="resPred" class="text-2xl font-bold text-white">--</div>
+                                    <div class="text-[9px] text-slate-500 mt-1">ERROR: <span id="resDelta"
+                                            class="text-white font-mono">--</span></div>
+                                </div>
+                                <div class="bg-slate-800/80 p-3 rounded-lg border border-slate-700">
+                                    <div class="text-[9px] text-yellow-400 font-bold uppercase mb-1">Actual Price</div>
+                                    <div id="resAct" class="text-2xl font-bold text-slate-300">--</div>
+                                    <div id="resMove" class="text-[9px] text-slate-500 mt-1 uppercase font-bold">--
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Middle: Logistics & Satellite -->
+                            <div class="space-y-2 pt-2">
+                                <h4
+                                    class="text-[10px] text-slate-500 uppercase font-bold text-center border-b border-slate-800 pb-1">
+                                    Satellite Intelligence</h4>
+                                <div class="grid grid-cols-2 gap-x-4 gap-y-2 text-xs">
+                                    <div class="flex justify-between px-1"><span class="text-slate-500">Logistics
+                                            Stress</span><span id="resTraffic" class="text-white font-mono">--</span>
+                                    </div>
+                                    <div class="flex justify-between px-1"><span
                                             class="text-purple-400 font-bold">BREAKAGE SCORE</span><span
-                                            id="resBreakage" class="text-purple-300 font-bold">--</span></div>
+                                            id="resBreakage" class="text-purple-300 font-bold font-mono">--</span></div>
+                                </div>
+                            </div>
+
+                            <!-- Bottom: Intraday Chart -->
+                            <div id="hourlyResult"
+                                class="hidden flex-1 flex flex-col mt-2 pt-2 border-t border-slate-700 min-h-[200px]">
+                                <h4 class="text-[9px] font-bold text-slate-500 uppercase mb-2">High-Frequency Forecast
+                                    (5-MIN)</h4>
+                                <div class="flex-1 relative w-full">
+                                    <canvas id="hourlyChart"></canvas>
                                 </div>
                             </div>
                         </div>
-                        <div id="predEmpty" class="h-full flex flex-col items-center justify-center text-slate-600"><i
-                                class="fas fa-search mb-2 text-xl"></i><span class="text-[10px]">No Prediction
-                                Yet.</span></div>
 
-                        <!-- HOURLY CHART (New) -->
-                        <div id="hourlyResult" class="hidden mt-4 pt-4 border-t border-slate-700 h-40 relative">
-                            <h4 class="text-[10px] font-bold text-slate-500 uppercase mb-2">INTRADAY FORECAST (Hourly)
-                            </h4>
-                            <canvas id="hourlyChart"></canvas>
+                        <div id="predEmpty"
+                            class="h-full flex flex-col items-center justify-center text-slate-600 space-y-3">
+                            <div
+                                class="w-16 h-16 rounded-full bg-slate-800 flex items-center justify-center animate-pulse-slow">
+                                <i class="fas fa-satellite-dish text-2xl opacity-50"></i>
+                            </div>
+                            <span class="text-xs uppercase tracking-widest text-center">Awaiting Target
+                                Coordinates...</span>
                         </div>
                     </div>
-
-                    <!-- Backtest Controls -->
-                    <div class="glass-dark p-6">
-                        <label class="text-[10px] text-slate-500 uppercase">Full simulation (Win Rate)</label>
-                        <button id="btnBacktest" onclick="runBacktest()"
-                            class="w-full mt-2 py-3 border border-slate-700 hover:border-cyan-500 text-slate-300 hover:text-white text-xs font-bold rounded transition-all flex justify-center items-center space-x-2 relative">
-                            <span>RUN Q1 2024 BACKTEST</span>
-                            <i class="fas fa-play"></i>
-                        </button>
-                        <div id="backtestStats" class="grid grid-cols-2 gap-4 mt-4 opacity-50">
-                            <div><span class="block text-[10px] text-slate-500">WIN RATE</span><span id="btAcc"
-                                    class="text-xl font-bold text-white">--</span></div>
-                            <div><span class="block text-[10px] text-slate-500">ROI</span><span id="btRoi"
-                                    class="text-xl font-bold text-white">--</span></div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Right: Dual Charts -->
-                <div class="col-span-8 grid grid-rows-2 gap-4 h-full">
-                    <!-- Top Chart: Returns / Equity -->
-                    <div class="glass-dark p-4 relative flex flex-col">
-                        <h4 class="text-[10px] font-bold text-cyan-400 uppercase mb-2">Algorithm Equity Curve</h4>
-                        <div class="flex-1 relative">
-                            <canvas id="equityChart"></canvas>
-                        </div>
-                    </div>
-                    <!-- Bottom Chart: Prediction vs Actual -->
-                    <div class="glass-dark p-4 relative flex flex-col">
-                        <h4 class="text-[10px] font-bold text-yellow-400 uppercase mb-2">Price Action: Predicted vs
-                            Actual</h4>
-                        <div class="flex-1 relative">
-                            <canvas id="priceChart"></canvas>
-                        </div>
+                </div> <!-- Backtest Controls -->
+                <div class="glass-dark p-6">
+                    <label class="text-[10px] text-slate-500 uppercase">Full simulation (Win Rate)</label>
+                    <button id="btnBacktest" onclick="runBacktest()"
+                        class="w-full mt-2 py-3 border border-slate-700 hover:border-cyan-500 text-slate-300 hover:text-white text-xs font-bold rounded transition-all flex justify-center items-center space-x-2 relative">
+                        <span>RUN Q1 2024 BACKTEST</span>
+                        <i class="fas fa-play"></i>
+                    </button>
+                    <div id="backtestStats" class="grid grid-cols-2 gap-4 mt-4 opacity-50">
+                        <div><span class="block text-[10px] text-slate-500">WIN RATE</span><span id="btAcc"
+                                class="text-xl font-bold text-white">--</span></div>
+                        <div><span class="block text-[10px] text-slate-500">ROI</span><span id="btRoi"
+                                class="text-xl font-bold text-white">--</span></div>
                     </div>
                 </div>
             </div>
 
-            <!-- VIEW: INTERNALS -->
-            <div id="viewInternals"
-                class="h-full hidden glass-dark p-8 flex flex-col items-center justify-center space-y-8 relative overflow-hidden">
-                <div
-                    class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10">
+            <!-- Right: Dual Charts -->
+            <div class="col-span-8 grid grid-rows-2 gap-4 h-full">
+                <!-- Top Chart: Returns / Equity -->
+                <div class="glass-dark p-4 relative flex flex-col">
+                    <h4 class="text-[10px] font-bold text-cyan-400 uppercase mb-2">Algorithm Equity Curve</h4>
+                    <div class="flex-1 relative">
+                        <canvas id="equityChart"></canvas>
+                    </div>
                 </div>
-                <h2 class="text-2xl font-bold text-white mb-8 z-10">AgriFlow Intelligence Pipeline</h2>
-                <div class="flex items-center justify-between w-full max-w-4xl z-10 relative">
-                    <div class="flex flex-col items-center space-y-2">
-                        <div
-                            class="w-16 h-16 rounded-full bg-slate-800 border border-slate-600 flex items-center justify-center text-2xl text-cyan-400 shadow-[0_0_20px_rgba(34,211,238,0.2)]">
-                            <i class="fas fa-satellite"></i>
-                        </div><span class="text-xs font-bold text-slate-400">SATELLITE DATA</span>
-                    </div>
-                    <div class="flex-1 h-1 bg-slate-800 relative mx-4">
-                        <div
-                            class="absolute top-[-3px] left-0 w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_10px_#22d3ee] animate-[bounce_1s_infinite]">
-                        </div>
-                    </div>
-                    <div class="flex flex-col items-center space-y-2">
-                        <div
-                            class="w-16 h-16 rounded-full bg-slate-800 border border-slate-600 flex items-center justify-center text-2xl text-yellow-400 shadow-[0_0_20px_rgba(250,204,21,0.2)]">
-                            <i class="fas fa-truck"></i>
-                        </div><span class="text-xs font-bold text-slate-400">PHYSICS
-                            TWIN</span>
-                    </div>
-                    <div class="flex-1 h-1 bg-slate-800 relative mx-4"></div>
-                    <div class="flex flex-col items-center space-y-2">
-                        <div
-                            class="w-16 h-16 rounded-full bg-slate-800 border border-slate-600 flex items-center justify-center text-2xl text-purple-400 shadow-[0_0_20px_rgba(192,132,252,0.2)]">
-                            <i class="fas fa-brain"></i>
-                        </div><span class="text-xs font-bold text-slate-400">GRADIENT
-                            BOOSTING</span>
-                    </div>
-                    <div class="flex-1 h-1 bg-slate-800 relative mx-4"></div>
-                    <div class="flex flex-col items-center space-y-2">
-                        <div
-                            class="w-16 h-16 rounded-full bg-green-900/50 border border-green-500 flex items-center justify-center text-2xl text-green-400 shadow-[0_0_30px_rgba(74,222,128,0.4)]">
-                            <i class="fas fa-chart-line"></i>
-                        </div><span class="text-xs font-bold text-green-400">ALPHA
-                            SIGNAL</span>
+                <!-- Bottom Chart: Prediction vs Actual -->
+                <div class="glass-dark p-4 relative flex flex-col">
+                    <h4 class="text-[10px] font-bold text-yellow-400 uppercase mb-2">Price Action: Predicted vs
+                        Actual</h4>
+                    <div class="flex-1 relative">
+                        <canvas id="priceChart"></canvas>
                     </div>
                 </div>
             </div>
+        </div>
+
+        <!-- VIEW: INTERNALS -->
+        <div id="viewInternals"
+            class="h-full hidden glass-dark p-8 flex flex-col items-center justify-center space-y-8 relative overflow-hidden">
+            <div
+                class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10">
+            </div>
+            <h2 class="text-2xl font-bold text-white mb-8 z-10">AgriFlow Intelligence Pipeline</h2>
+            <div class="flex items-center justify-between w-full max-w-4xl z-10 relative">
+                <div class="flex flex-col items-center space-y-2">
+                    <div
+                        class="w-16 h-16 rounded-full bg-slate-800 border border-slate-600 flex items-center justify-center text-2xl text-cyan-400 shadow-[0_0_20px_rgba(34,211,238,0.2)]">
+                        <i class="fas fa-satellite"></i>
+                    </div><span class="text-xs font-bold text-slate-400">SATELLITE DATA</span>
+                </div>
+                <div class="flex-1 h-1 bg-slate-800 relative mx-4">
+                    <div
+                        class="absolute top-[-3px] left-0 w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_10px_#22d3ee] animate-[bounce_1s_infinite]">
+                    </div>
+                </div>
+                <div class="flex flex-col items-center space-y-2">
+                    <div
+                        class="w-16 h-16 rounded-full bg-slate-800 border border-slate-600 flex items-center justify-center text-2xl text-yellow-400 shadow-[0_0_20px_rgba(250,204,21,0.2)]">
+                        <i class="fas fa-truck"></i>
+                    </div><span class="text-xs font-bold text-slate-400">PHYSICS
+                        TWIN</span>
+                </div>
+                <div class="flex-1 h-1 bg-slate-800 relative mx-4"></div>
+                <div class="flex flex-col items-center space-y-2">
+                    <div
+                        class="w-16 h-16 rounded-full bg-slate-800 border border-slate-600 flex items-center justify-center text-2xl text-purple-400 shadow-[0_0_20px_rgba(192,132,252,0.2)]">
+                        <i class="fas fa-brain"></i>
+                    </div><span class="text-xs font-bold text-slate-400">GRADIENT
+                        BOOSTING</span>
+                </div>
+                <div class="flex-1 h-1 bg-slate-800 relative mx-4"></div>
+                <div class="flex flex-col items-center space-y-2">
+                    <div
+                        class="w-16 h-16 rounded-full bg-green-900/50 border border-green-500 flex items-center justify-center text-2xl text-green-400 shadow-[0_0_30px_rgba(74,222,128,0.4)]">
+                        <i class="fas fa-chart-line"></i>
+                    </div><span class="text-xs font-bold text-green-400">ALPHA
+                        SIGNAL</span>
+                </div>
+            </div>
+        </div>
 
         </div>
 
@@ -481,6 +519,28 @@
             btn.innerText = original; btn.disabled = false;
         }
 
+        // --- UI UTILS ---
+        let isFullscreen = false;
+        function toggleFullscreen() {
+            const card = document.getElementById('cardSingleEvent');
+            const icon = card.querySelector('.fa-expand, .fa-compress');
+            isFullscreen = !isFullscreen;
+
+            if (isFullscreen) {
+                // Expand
+                card.classList.remove('col-span-4', 'h-[600px]');
+                card.classList.add('fixed', 'inset-4', 'z-50', 'h-auto', 'w-auto');
+                if (icon) { icon.classList.remove('fa-expand'); icon.classList.add('fa-compress'); }
+            } else {
+                // Contract
+                card.classList.remove('fixed', 'inset-4', 'z-50', 'h-auto', 'w-auto');
+                card.classList.add('col-span-4', 'h-[600px]');
+                if (icon) { icon.classList.remove('fa-compress'); icon.classList.add('fa-expand'); }
+            }
+            // Trigger Chart Resize
+            setTimeout(() => { if (hourlyChart) hourlyChart.resize(); }, 300);
+        }
+
         async function runPrediction() {
             const btn = document.querySelector('button[onclick="runPrediction()"]');
             btn.classList.add('loading-btn'); // Start Loading Bar
@@ -501,6 +561,14 @@
                 document.getElementById('resPred').innerText = "$" + data.predicted_price;
                 document.getElementById('resAct').innerText = "$" + data.actual_price;
 
+                // Error / Delta Display
+                const delta = data.delta_percent;
+                const deltaEl = document.getElementById('resDelta');
+                deltaEl.innerText = (delta > 0 ? "+" : "") + delta + "%";
+                deltaEl.className = Math.abs(delta) < 1.0 ? "text-green-400 font-mono font-bold" : "text-red-400 font-mono font-bold";
+
+                document.getElementById('resMove').innerText = "ACTUAL MOVE: " + data.actual_move;
+
                 document.getElementById('resTraffic').innerText = data.satellite_data.traffic_stress_index + " (Idx)";
                 document.getElementById('resBreakage').innerText = data.satellite_data.logistics_disruption_score + "/100";
 
@@ -511,7 +579,8 @@
                 // HOURLY CHART RENDERING
                 if (data.hourly_forecast) {
                     if (hourlyChart) hourlyChart.destroy();
-                    const h_labels = data.hourly_forecast.map(x => x.hour);
+                    // Map 'time' (High Frequency)
+                    const h_labels = data.hourly_forecast.map(x => x.time);
                     const h_prices = data.hourly_forecast.map(x => x.price);
 
                     hourlyChart = new Chart(document.getElementById('hourlyChart'), {
@@ -519,16 +588,37 @@
                         data: {
                             labels: h_labels,
                             datasets: [{
-                                label: 'Intraday Forecast',
+                                label: 'Intraday',
                                 data: h_prices,
-                                borderColor: '#22d3ee', borderWidth: 2, pointRadius: 0,
-                                tension: 0.4
+                                borderColor: '#22d3ee',
+                                borderWidth: 1.5,
+                                pointRadius: 0, // Smooth line, no dots
+                                pointHoverRadius: 4,
+                                fill: true,
+                                backgroundColor: 'rgba(34, 211, 238, 0.05)',
+                                tension: 0.1
                             }]
                         },
                         options: {
-                            maintainAspectRatio: false, responsie: true,
-                            plugins: { legend: { display: false } },
-                            scales: { x: { display: false }, y: { display: false } }
+                            maintainAspectRatio: false,
+                            responsive: true,
+                            interaction: { mode: 'index', intersect: false },
+                            plugins: {
+                                legend: { display: false },
+                                tooltip: {
+                                    mode: 'index', intersect: false,
+                                    callbacks: { label: (c) => '$' + c.raw }
+                                }
+                            },
+                            scales: {
+                                x: { display: false }, // Hide dense X labels
+                                y: {
+                                    display: true,
+                                    position: 'right',
+                                    grid: { color: '#1e293b' },
+                                    ticks: { color: '#64748b', font: { size: 9 } }
+                                }
+                            }
                         }
                     });
                 }

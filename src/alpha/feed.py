@@ -4,7 +4,7 @@ import requests_cache
 import pandas as pd
 from retry_requests import retry
 import yfinance as yf
-import datetime
+from datetime import datetime, timedelta
 
 class MarketFeed:
     def __init__(self):
@@ -116,6 +116,75 @@ class MarketFeed:
             except Exception as e2:
                 print(f"CRITICAL: All Weather feeds failed. {e2}")
                 return pd.DataFrame()
+
+    def get_intraday_data(self, ticker, date_str):
+        """
+        Fetches High-Frequency Intraday Data.
+        Logic:
+        - < 7 Days Ago: Fetch 1-Minute Resolution (Real Trading)
+        - < 60 Days Ago: Fetch 5-Minute Resolution
+        - < 730 Days Ago: Fetch 1-Hour Resolution
+        """
+        try:
+            target_date = pd.to_datetime(date_str)
+            today = pd.Timestamp.now()
+            diff_days = (today - target_date).days
+            
+            interval = "1h"
+            if diff_days < 7:
+                interval = "1m"
+            elif diff_days < 59:
+                interval = "5m"
+            elif diff_days > 720:
+                return pd.DataFrame() # Limit
+
+            start_dt = target_date
+            # Ensure we cover the full trading session
+            # Yahoo needs next day as end for inclusive fetch
+            end_dt = target_date + timedelta(days=1)
+            
+            # Fetch
+            df = yf.download(ticker, start=start_dt, end=end_dt, interval=interval, progress=False)
+            
+            if df.empty: return pd.DataFrame()
+            
+            # Flatten YF MultiIndex
+            if isinstance(df.columns, pd.MultiIndex):
+                df.columns = df.columns.get_level_values(0)
+            
+            df = df.reset_index()
+            
+            # Helper to find timestamp col
+            ts_col = None
+            for c in df.columns:
+                if str(c).lower() in ['datetime', 'date', 'timestamp']:
+                    ts_col = c
+                    break
+            
+            if not ts_col:
+                if df.index.name and str(df.index.name).lower() in ['datetime', 'date']:
+                    df['timestamp'] = df.index
+                    ts_col = 'timestamp'
+                else:
+                    return pd.DataFrame()
+
+            # Rename
+            df.rename(columns={ts_col: 'timestamp', 'Close': 'price', 'Adj Close': 'price'}, inplace=True)
+            
+            # Clean
+            # Format time based on resolution
+            if interval == "1m":
+                df['time_label'] = df['timestamp'].dt.strftime('%H:%M')
+            elif interval == "5m":
+                df['time_label'] = df['timestamp'].dt.strftime('%H:%M')
+            else:
+                df['time_label'] = df['timestamp'].dt.strftime('%H:%M')
+                
+            return df[['time_label', 'price']]
+            
+        except Exception as e:
+            print(f"Intraday Fetch Error: {e}")
+            return pd.DataFrame()
 
     def get_market_data(self, ticker="DC=F", start_date="2024-01-01", end_date="2024-03-31"):
         """
