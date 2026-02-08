@@ -1,12 +1,14 @@
 
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, send_file
 import pandas as pd
 import numpy as np
 import time
 from src.logistics.simulation_engine import SimulationEngine
+from src.alpha.plot import AlphaPlotter # New Import
 
 app = Flask(__name__)
 engine = SimulationEngine()
+alpha_plotter = AlphaPlotter() # Initialize Alpha
 
 @app.route('/')
 def home():
@@ -40,6 +42,19 @@ def run_simulation():
         }
     }
     return jsonify(response)
+
+@app.route('/generate_alpha_chart', methods=['POST'])
+def generate_alpha():
+    data = request.json
+    start = data.get('start_date', '2024-01-01')
+    end = data.get('end_date', '2024-03-31')
+    
+    buf = alpha_plotter.generate_correlation_chart(start, end)
+    
+    if buf:
+        return send_file(buf, mimetype='image/png')
+    else:
+        return jsonify({"error": "No Data Found"}), 404
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
