@@ -4,15 +4,36 @@ import pandas as pd
 import numpy as np
 import time
 from src.logistics.simulation_engine import SimulationEngine
-from src.alpha.plot import AlphaPlotter # New Import
+from src.alpha.plot import AlphaPlotter 
+from src.alpha.predictor import AgriAlphaPredictor # New
 
 app = Flask(__name__)
 engine = SimulationEngine()
-alpha_plotter = AlphaPlotter() # Initialize Alpha
+alpha_plotter = AlphaPlotter()
+predictor = AgriAlphaPredictor()
 
 @app.route('/')
 def home():
     return render_template('index.html')
+
+@app.route('/predict_event', methods=['POST'])
+def predict_event():
+    data = request.json
+    date = data.get('date', '2024-01-15')
+    ticker = data.get('ticker', 'DC=F')
+    
+    result = predictor.predict_single_event(date, ticker)
+    return jsonify(result)
+
+@app.route('/run_backtest', methods=['POST'])
+def run_backtest():
+    data = request.json
+    start = data.get('start', '2024-01-01')
+    end = data.get('end', '2024-03-31')
+    ticker = data.get('ticker', 'DC=F')
+    
+    result = predictor.run_backtest(start, end, ticker)
+    return jsonify(result)
 
 @app.route('/run_simulation', methods=['POST'])
 def run_simulation():

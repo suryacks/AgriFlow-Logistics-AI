@@ -4,352 +4,439 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AgriFlow Dashboard</title>
-    <!-- Tailwind CSS (via CDN) -->
+    <title>AgriFlow V2: Logistics-to-Alpha</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Custom Font -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <!-- Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;700&display=swap"
+        rel="stylesheet">
     <style>
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: #0f172a;
-            color: white;
+            font-family: 'Space Grotesk', sans-serif;
+            background-color: #020617;
+            color: #e2e8f0;
         }
 
-        .glass-panel {
-            background: rgba(30, 41, 59, 0.7);
-            backdrop-filter: blur(12px);
+        .glass-dark {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+        }
+
+        .neon-green {
+            text-shadow: 0 0 10px rgba(74, 222, 128, 0.5);
+        }
+
+        .neon-blue {
+            text-shadow: 0 0 10px rgba(34, 211, 238, 0.5);
+        }
+
+        /* Flow Diagram CSS */
+        .flow-node {
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            text-align: center;
             border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 16px;
         }
 
-        .gradient-text {
-            background: linear-gradient(to right, #4ade80, #22d3ee);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+        .flow-line {
+            height: 2px;
+            background: #334155;
+            width: 30px;
+        }
+
+        .animate-pulse-slow {
+            animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
         }
     </style>
 </head>
 
 <body
-    class="h-screen flex flex-col items-center justify-center overflow-hidden bg-[url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2672&auto=format&fit=crop')] bg-cover bg-center">
+    class="h-screen overflow-hidden bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-900 via-[#020617] to-black">
 
-    <!-- Dark Overlay -->
-    <div class="absolute inset-0 bg-slate-900/90 z-0"></div>
+    <!-- Top Nav -->
+    <nav class="absolute top-0 w-full p-6 flex justify-between items-center z-50">
+        <div class="flex items-center space-x-3">
+            <div
+                class="w-8 h-8 rounded bg-gradient-to-br from-green-500 to-cyan-500 flex items-center justify-center font-bold text-black">
+                A</div>
+            <h1 class="text-xl font-bold tracking-widest">AGRI<span class="text-green-400">FLOW</span></h1>
+        </div>
+        <div class="flex space-x-1 bg-slate-800/50 p-1 rounded-lg backdrop-blur">
+            <button onclick="setMode('logistics')" id="btnLogistics"
+                class="px-4 py-2 text-xs font-bold rounded bg-slate-700 text-white shadow transition-all">LOGISTICS
+                TWIN</button>
+            <button onclick="setMode('alpha')" id="btnAlpha"
+                class="px-4 py-2 text-xs font-bold rounded text-slate-400 hover:text-white transition-all">ALPHA
+                PREDATOR</button>
+        </div>
+    </nav>
 
-    <!-- Main Container -->
-    <div class="relative z-10 w-full max-w-6xl p-6 grid grid-cols-12 gap-6 h-[90vh]">
+    <!-- Main Content -->
+    <main class="h-full pt-20 pb-6 px-6 grid grid-cols-12 gap-6">
 
-        <!-- Sidebar Controls -->
-        <div class="glass-panel col-span-3 p-6 flex flex-col justify-between">
-            <div>
-                <h1 class="text-3xl font-bold mb-2">AgriFlow <span class="text-xs align-top text-green-400">AI</span>
-                </h1>
+        <!-- Sidebar: Configuration -->
+        <div class="glass-dark col-span-3 p-6 flex flex-col h-full">
+            <h2 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-6">Mission Control</h2>
 
-                <!-- Tab Switcher -->
-                <div class="flex space-x-2 mb-6 bg-slate-800 p-1 rounded-lg">
-                    <button onclick="switchTab('fleet')" id="tabFleet"
-                        class="flex-1 py-2 text-xs font-bold rounded-md bg-slate-600 text-white transition">FLEET
-                        OPS</button>
-                    <button onclick="switchTab('alpha')" id="tabAlpha"
-                        class="flex-1 py-2 text-xs font-bold rounded-md text-slate-400 hover:text-white transition">MARKET
-                        ALPHA</button>
+            <!-- LOGISTICS CONTROLS -->
+            <div id="ctrlLogistics" class="space-y-8 animate-fade-in">
+                <div>
+                    <label class="text-[10px] text-green-400 uppercase font-bold">Fleet Capacity</label>
+                    <input type="range" id="fleetSize" min="10" max="200" value="50"
+                        class="w-full mt-2 accent-green-500 h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer">
+                    <div class="flex justify-between text-xs text-slate-400 mt-1"><span>10</span><span id="fleetLabel"
+                            class="text-white">50 Trucks</span><span>200</span></div>
+                </div>
+                <div>
+                    <label class="text-[10px] text-red-400 uppercase font-bold">Traffic Entropy</label>
+                    <input type="range" id="trafficProb" min="0" max="0.5" step="0.05" value="0.1"
+                        class="w-full mt-2 accent-red-500 h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer">
+                    <div class="text-right text-xs text-white mt-1" id="trafficLabel">10% Chaos</div>
+                </div>
+                <div>
+                    <label class="text-[10px] text-yellow-500 uppercase font-bold">Thermal Stress</label>
+                    <input type="range" id="heatFactor" min="0" max="1.0" step="0.1" value="0.5"
+                        class="w-full mt-2 accent-yellow-500 h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer">
+                    <div class="text-right text-xs text-white mt-1" id="heatLabel">50% Intensity</div>
+                </div>
+                <button onclick="runFleetSim()"
+                    class="w-full py-3 bg-green-600 hover:bg-green-500 text-black font-bold tracking-tight rounded shadow-[0_0_20px_rgba(74,222,128,0.3)] transition-all">
+                    INITIATE FLEET SIMULATOR
+                </button>
+            </div>
+
+            <!-- ALPHA CONTROLS (Hidden) -->
+            <div id="ctrlAlpha" class="hidden space-y-6">
+                <div>
+                    <label class="text-[10px] text-cyan-400 uppercase font-bold">Target Asset</label>
+                    <select id="ticker"
+                        class="w-full mt-2 bg-slate-900 border border-slate-700 rounded p-2 text-sm focus:border-cyan-500 outline-none">
+                        <option value="DC=F">Class III Milk (Futures)</option>
+                        <option value="ZC=F">Corn (Futures)</option>
+                        <option value="ZS=F">Soybeans (Futures)</option>
+                        <option value="LE=F">Live Cattle (Futures)</option>
+                    </select>
                 </div>
 
-                <!-- FLEET CONTROLS -->
-                <div id="fleetControls" class="space-y-6">
-                    <div>
-                        <label class="block text-xs font-semibold uppercase text-slate-500 mb-2">Fleet Size</label>
-                        <input type="range" id="fleetSize" min="5" max="200" value="50" class="w-full accent-green-500">
-                        <div class="flex justify-between text-xs text-slate-300">
-                            <span>5</span>
-                            <span id="fleetVal">50 Trucks</span>
-                            <span>200</span>
+                <!-- Mode Switcher: Single vs Backtest -->
+                <div class="border-t border-slate-800 pt-4">
+                    <h3 class="text-xs font-bold text-white mb-3">Analysis Mode</h3>
+
+                    <!-- Single Prediction -->
+                    <div class="mb-6">
+                        <label class="text-[10px] text-slate-500 uppercase">Time Machine (Predict One Event)</label>
+                        <div class="flex space-x-2 mt-1">
+                            <input type="date" id="predictDate" value="2024-01-16"
+                                class="bg-slate-900 border border-slate-700 rounded p-2 text-xs w-full">
+                            <button onclick="runPrediction()"
+                                class="px-3 bg-cyan-600 text-black text-xs font-bold rounded hover:bg-cyan-500"><i
+                                    class="fas fa-bolt"></i></button>
                         </div>
                     </div>
 
+                    <!-- Backtest -->
                     <div>
-                        <label class="block text-xs font-semibold uppercase text-slate-500 mb-2">Traffic Chaos</label>
-                        <input type="range" id="trafficProb" min="0" max="0.5" step="0.05" value="0.1"
-                            class="w-full accent-red-500">
-                        <div class="flex justify-between text-xs text-slate-300">
-                            <span>Clean</span>
-                            <span id="trafficVal">10% Jam Risk</span>
-                            <span>Gridlock</span>
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-semibold uppercase text-slate-500 mb-2">Heat Wave
-                            (Spoilage)</label>
-                        <input type="range" id="heatFactor" min="0" max="1.0" step="0.1" value="0.5"
-                            class="w-full accent-yellow-500">
-                        <div class="flex justify-between text-xs text-slate-300">
-                            <span>Cold</span>
-                            <span id="heatVal">50% Heat</span>
-                            <span>Inferno</span>
-                        </div>
-                    </div>
-
-                    <button onclick="runFleetSim()"
-                        class="w-full py-4 bg-gradient-to-r from-green-500 to-emerald-600 rounded-xl font-bold text-white shadow-lg hover:shadow-green-500/25 transition transform hover:scale-105">
-                        RUN SIMULATION
-                    </button>
-                </div>
-
-                <!-- ALPHA CONTROLS (Hidden by default) -->
-                <div id="alphaControls" class="space-y-6 hidden">
-                    <div>
-                        <label class="block text-xs font-semibold uppercase text-slate-500 mb-2">Start Date</label>
-                        <input type="date" id="startDate" value="2024-01-01"
-                            class="w-full bg-slate-800 border border-slate-700 rounded p-2 text-sm text-white">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold uppercase text-slate-500 mb-2">End Date</label>
-                        <input type="date" id="endDate" value="2024-03-31"
-                            class="w-full bg-slate-800 border border-slate-700 rounded p-2 text-sm text-white">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold uppercase text-slate-500 mb-2">Commodity</label>
-                        <select id="commodity"
-                            class="w-full bg-slate-800 border border-slate-700 rounded p-2 text-sm text-white">
-                            <option value="DC=F">Class III Milk</option>
-                            <option value="LE=F">Live Cattle</option>
-                            <option value="HE=F">Lean Hogs</option>
-                            <option value="ZC=F">Corn Futures</option>
-                            <option value="ZS=F">Soybean Futures</option>
-                        </select>
-                    </div>
-
-                    <button onclick="runAlphaSim()"
-                        class="w-full py-4 bg-gradient-to-r from-blue-500 to-cyan-600 rounded-xl font-bold text-white shadow-lg hover:shadow-blue-500/25 transition transform hover:scale-105">
-                        GENERATE SIGNAL
-                    </button>
-
-                    <!-- Architecture Diagram -->
-                    <div class="mt-8 pt-6 border-t border-slate-700">
-                        <h4 class="text-xs font-bold text-slate-500 mb-4 uppercase">System Logic</h4>
-                        <div class="bg-slate-900 rounded p-4 text-xs text-slate-400 font-mono">
-                            [Weather API] --> [AgriFlow Agent] --> [Disruption Score]
-                            |
-                            [Market Data] ------------------------> [Alpha Signal]
-                        </div>
+                        <label class="text-[10px] text-slate-500 uppercase">Full simulation (Win Rate)</label>
+                        <button onclick="runBacktest()"
+                            class="w-full mt-2 py-3 border border-slate-700 hover:border-cyan-500 text-slate-300 hover:text-white text-xs font-bold rounded transition-all flex justify-center items-center space-x-2">
+                            <span>RUN Q1 2024 BACKTEST</span>
+                            <i class="fas fa-play"></i>
+                        </button>
                     </div>
                 </div>
             </div>
 
-            <button onclick="runSimulation()" class="hidden"></button> <!-- Dummy Fix for old JS calls if any -->
+            <!-- System Diagram (Visual) -->
+            <div class="mt-auto pt-6 border-t border-slate-800">
+                <h4 class="text-[10px] font-bold text-slate-600 uppercase mb-3">AgriFlow Intelligence Pipeline</h4>
+                <div class="flex flex-col items-center space-y-2 opacity-80">
+                    <div class="flex items-center space-x-1">
+                        <div class="flow-node bg-slate-800 text-blue-300"><i class="fas fa-satellite"></i> Sat Data
+                        </div>
+                        <div class="flow-line"></div>
+                        <div class="flow-node bg-slate-800 text-yellow-300"><i class="fas fa-truck"></i> Fleet Twin
+                        </div>
+                    </div>
+                    <div class="h-4 w-0.5 bg-slate-700"></div>
+                    <div class="flow-node w-full bg-slate-900 border-green-500/30 text-green-400">
+                        <span class="animate-pulse-slow">●</span> Logistic Disruption Score
+                    </div>
+                    <div class="h-4 w-0.5 bg-slate-700"></div>
+                    <div class="flow-node w-full bg-slate-800 text-white">
+                        <i class="fas fa-chart-line"></i> Alpha Signal
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <!-- Dashboard Area -->
+        <!-- Main Display Area -->
         <div class="col-span-9 grid grid-rows-1 h-full gap-6">
 
-            <!-- FLEET VIEW -->
-            <div id="fleetView" class="h-full flex flex-col gap-6">
-                <!-- Metrics Row -->
-                <div class="grid grid-cols-3 gap-6 h-1/4">
-                    <!-- SAP Card -->
-                    <div class="glass-panel p-6 flex flex-col justify-center items-center border-l-4 border-red-500">
-                        <h3 class="text-slate-400 text-sm font-semibold uppercase">Traditional ERP</h3>
-                        <div id="sapProfit" class="text-3xl font-bold text-red-400 mt-2">$0</div>
-                        <span class="text-xs text-slate-500 mt-1">Static Optimization</span>
+            <!-- VIEW: LOGISTICS -->
+            <div id="viewLogistics" class="h-full flex flex-col space-y-6">
+                <div class="grid grid-cols-3 gap-6 h-32">
+                    <div class="glass-dark p-4 flex flex-col justify-center border-l-2 border-slate-700">
+                        <span class="text-xs text-slate-500 uppercase font-bold">Baseline Profit</span>
+                        <span id="sapVal" class="text-2xl font-mono text-slate-300 mt-1">--</span>
                     </div>
-
-                    <!-- AgriFlow Card -->
-                    <div
-                        class="glass-panel p-6 flex flex-col justify-center items-center border-l-4 border-green-500 relative overflow-hidden">
-                        <div class="absolute inset-0 bg-green-500/5"></div>
-                        <img src="https://img.icons8.com/color/48/artificial-intelligence.png"
-                            class="w-8 h-8 opacity-20 absolute top-4 right-4">
-                        <h3 class="text-green-400 text-sm font-semibold uppercase">AgriFlow AI</h3>
-                        <div id="aiProfit" class="text-4xl font-bold text-white mt-2">$0</div>
-                        <span class="text-xs text-slate-400 mt-1">Dynamic RL Swarm</span>
+                    <div class="glass-dark p-4 flex flex-col justify-center border-l-2 border-green-500 bg-green-500/5">
+                        <span class="text-xs text-green-400 uppercase font-bold">AgriFlow Profit</span>
+                        <span id="aiVal" class="text-3xl font-mono text-white mt-1 neon-green">--</span>
                     </div>
-
-                    <!-- Gain Card -->
-                    <div
-                        class="glass-panel p-6 flex flex-col justify-center items-center bg-gradient-to-br from-slate-800 to-slate-900">
-                        <h3 class="text-slate-400 text-sm font-semibold uppercase">Efficiency Gain</h3>
-                        <div id="gainPercent" class="text-3xl font-bold gradient-text mt-2">0%</div>
-                        <span class="text-xs text-slate-500 mt-1">AI Outperformance</span>
+                    <div class="glass-dark p-4 flex flex-col justify-center">
+                        <span class="text-xs text-slate-500 uppercase font-bold">Optimization Delta</span>
+                        <span id="gainVal" class="text-2xl font-bold text-white mt-1">--</span>
                     </div>
                 </div>
-
-                <!-- Chart Area -->
-                <div class="glass-panel p-6 relative h-3/4">
-                    <canvas id="profitChart"></canvas>
+                <div class="glass-dark flex-1 p-4 relative">
+                    <canvas id="logisticsChart"></canvas>
                 </div>
             </div>
 
-            <!-- ALPHA VIEW (Hidden) -->
-            <div id="alphaView" class="h-full hidden">
-                <div class="glass-panel p-6 h-full flex flex-col justify-center items-center">
-                    <h3 class="text-slate-400 text-sm font-semibold uppercase mb-4">Market Correlation Signal</h3>
-                    <div id="alphaChartContainer"
-                        class="w-full h-full flex justify-center items-center bg-slate-900/50 rounded-lg border border-slate-700/50">
-                        <span class="text-slate-600 text-xs">Awaiting Analysis...</span>
-                        <img id="alphaImg" class="max-h-full max-w-full hidden rounded-lg shadow-2xl">
+            <!-- VIEW: ALPHA (Analyst Dashboard) -->
+            <div id="viewAlpha" class="h-full hidden grid grid-cols-2 gap-6">
+
+                <!-- Left: Single Event Analysis -->
+                <div class="glass-dark p-6 relative overflow-hidden">
+                    <div class="absolute top-0 right-0 p-4 opacity-10"><i class="fas fa-microchip text-6xl"></i></div>
+                    <h3 class="text-sm font-bold text-white uppercase mb-6 border-b border-slate-700 pb-2">Single Event
+                        Prediction</h3>
+
+                    <div id="predResult" class="hidden space-y-6">
+                        <div class="flex justify-between items-end">
+                            <div>
+                                <div class="text-xs text-slate-500 uppercase">Target Date</div>
+                                <div id="resDate" class="text-xl font-mono text-white">2024-01-15</div>
+                            </div>
+                            <div class="text-right">
+                                <div id="resVerdict"
+                                    class="px-3 py-1 bg-green-500 text-black font-bold text-xs rounded uppercase">
+                                    CORRECT</div>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="bg-slate-800/50 p-3 rounded">
+                                <div class="text-[10px] text-slate-400">PREDICTED</div>
+                                <div id="resPred" class="text-lg font-bold text-cyan-400">$17.40</div>
+                                <div id="resSignal" class="text-xs text-slate-500 font-bold mt-1">SIGNAL: UP</div>
+                            </div>
+                            <div class="bg-slate-800/50 p-3 rounded">
+                                <div class="text-[10px] text-slate-400">ACTUAL</div>
+                                <div id="resAct" class="text-lg font-bold text-white">$17.42</div>
+                                <div id="resActMove" class="text-xs text-slate-500 font-bold mt-1">ACTUAL: UP</div>
+                            </div>
+                        </div>
+
+                        <div class="space-y-2">
+                            <div class="flex justify-between text-xs border-b border-slate-800 py-2">
+                                <span class="text-slate-500">Snow Accumulation (3d)</span>
+                                <span id="resSnow" class="text-white">12.4 cm</span>
+                            </div>
+                            <div class="flex justify-between text-xs border-b border-slate-800 py-2">
+                                <span class="text-slate-500">Est. Soil Temp</span>
+                                <span id="resSoil" class="text-white">-4.2 C</span>
+                            </div>
+                            <div class="flex justify-between text-xs py-2">
+                                <span class="text-slate-500">Error Delta</span>
+                                <span id="resDelta" class="text-green-400">0.12%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="predEmpty" class="h-64 flex flex-col items-center justify-center text-slate-600">
+                        <i class="fas fa-search mb-2 text-2xl"></i>
+                        <span class="text-xs">Select a date to travel back in time.</span>
                     </div>
                 </div>
+
+                <!-- Right: Backtest Results -->
+                <div class="glass-dark p-6 flex flex-col">
+                    <h3 class="text-sm font-bold text-white uppercase mb-4 border-b border-slate-700 pb-2">Quarterly
+                        Simulation (Q1 2024)</h3>
+
+                    <div id="backtestStats" class="grid grid-cols-2 gap-4 mb-4 opacity-50">
+                        <div>
+                            <span class="block text-[10px] text-slate-500">WIN RATE</span>
+                            <span id="btAcc" class="text-2xl font-bold text-white">--</span>
+                        </div>
+                        <div>
+                            <span class="block text-[10px] text-slate-500">ROI (Virtual)</span>
+                            <span id="btRoi" class="text-2xl font-bold text-white">--</span>
+                        </div>
+                    </div>
+
+                    <div class="flex-1 bg-slate-900/50 rounded-lg p-2 relative">
+                        <canvas id="backtestChart"></canvas>
+                        <div id="btOverlay"
+                            class="absolute inset-0 flex items-center justify-center text-xs text-slate-600">
+                            Wait for Simulation...
+                        </div>
+                    </div>
+                </div>
+
             </div>
+
         </div>
-    </div>
+
+    </main>
 
     <script>
-        // TABS logic
-        function switchTab(tab) {
-            if (tab === 'fleet') {
-                document.getElementById('fleetControls').classList.remove('hidden');
-                document.getElementById('alphaControls').classList.add('hidden');
-                document.getElementById('fleetView').classList.remove('hidden');
-                document.getElementById('alphaView').classList.add('hidden');
+        // GLOBALS
+        let logisticsChart, backtestChart;
 
-                document.getElementById('tabFleet').classList.add('bg-slate-600', 'text-white');
-                document.getElementById('tabFleet').classList.remove('text-slate-400');
-                document.getElementById('tabAlpha').classList.remove('bg-slate-600', 'text-white');
-                document.getElementById('tabAlpha').classList.add('text-slate-400');
+        // --- NAVIGATION ---
+        function setMode(mode) {
+            if (mode === 'logistics') {
+                document.getElementById('ctrlLogistics').classList.remove('hidden');
+                document.getElementById('ctrlAlpha').classList.add('hidden');
+                document.getElementById('viewLogistics').classList.remove('hidden');
+                document.getElementById('viewAlpha').classList.add('hidden');
+
+                document.getElementById('btnLogistics').className = "px-4 py-2 text-xs font-bold rounded bg-slate-700 text-white shadow";
+                document.getElementById('btnAlpha').className = "px-4 py-2 text-xs font-bold rounded text-slate-400 hover:text-white";
             } else {
-                document.getElementById('fleetControls').classList.add('hidden');
-                document.getElementById('alphaControls').classList.remove('hidden');
-                document.getElementById('fleetView').classList.add('hidden');
-                document.getElementById('alphaView').classList.remove('hidden');
+                document.getElementById('ctrlLogistics').classList.add('hidden');
+                document.getElementById('ctrlAlpha').classList.remove('hidden');
+                document.getElementById('viewLogistics').classList.add('hidden');
+                document.getElementById('viewAlpha').classList.remove('hidden');
 
-                document.getElementById('tabAlpha').classList.add('bg-slate-600', 'text-white');
-                document.getElementById('tabAlpha').classList.remove('text-slate-400');
-                document.getElementById('tabFleet').classList.remove('bg-slate-600', 'text-white');
-                document.getElementById('tabFleet').classList.add('text-slate-400');
+                document.getElementById('btnAlpha').className = "px-4 py-2 text-xs font-bold rounded bg-slate-700 text-white shadow";
+                document.getElementById('btnLogistics').className = "px-4 py-2 text-xs font-bold rounded text-slate-400 hover:text-white";
             }
         }
 
-        // Update Slider Labels
-        document.getElementById('fleetSize').oninput = function () { document.getElementById('fleetVal').innerText = this.value + " Trucks"; }
-        document.getElementById('trafficProb').oninput = function () { document.getElementById('trafficVal').innerText = (this.value * 100).toFixed(0) + "% Jam Risk"; }
-        document.getElementById('heatFactor').oninput = function () { document.getElementById('heatVal').innerText = (this.value * 100).toFixed(0) + "% Heat"; }
+        // --- SLIDERS ---
+        document.getElementById('fleetSize').oninput = function () { document.getElementById('fleetLabel').innerText = this.value + " Trucks"; }
+        document.getElementById('trafficProb').oninput = function () { document.getElementById('trafficLabel').innerText = (this.value * 100).toFixed(0) + "% Chaos"; }
+        document.getElementById('heatFactor').oninput = function () { document.getElementById('heatLabel').innerText = (this.value * 100).toFixed(0) + "% Intensity"; }
 
-        // Chart Setup (Fleet)
-        const ctx = document.getElementById('profitChart').getContext('2d');
-        let profitChart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: [],
-                datasets: [{
-                    label: 'AgriFlow AI',
-                    borderColor: '#4ade80',
-                    backgroundColor: 'rgba(74, 222, 128, 0.1)',
-                    borderWidth: 3,
-                    tension: 0.4,
-                    fill: true,
-                    data: []
-                }, {
-                    label: 'Traditional ERP',
-                    borderColor: '#f87171',
-                    borderWidth: 2,
-                    borderDash: [5, 5],
-                    tension: 0.4,
-                    data: []
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { position: 'top', labels: { color: '#cbd5e1' } }
-                },
-                scales: {
-                    y: { grid: { color: '#334155' }, ticks: { color: '#94a3b8' } },
-                    x: { display: false } // Hide steps for cleanness
-                }
-            }
-        });
-
+        // --- API CALLS ---
         async function runFleetSim() {
-            // Get Values
-            const fleet = document.getElementById('fleetSize').value;
-            const traffic = document.getElementById('trafficProb').value;
-            const heat = document.getElementById('heatFactor').value;
-
-            // Loading State (button)
-            const btn = document.querySelector('#fleetControls button');
-            const originalText = btn.innerText;
-            btn.innerText = "RUNNING... ";
-            btn.disabled = true;
-            btn.classList.add('opacity-75', 'cursor-not-allowed');
+            const btn = document.querySelector('#ctrlLogistics button');
+            const original = btn.innerText;
+            btn.innerText = "SIMULATING..."; btn.disabled = true;
 
             try {
-                const response = await fetch('/run_simulation', {
+                const res = await fetch('/run_simulation', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ fleet_size: fleet, traffic_prob: traffic, heat_factor: heat })
+                    body: JSON.stringify({
+                        fleet_size: document.getElementById('fleetSize').value,
+                        traffic_prob: document.getElementById('trafficProb').value,
+                        heat_factor: document.getElementById('heatFactor').value,
+                    })
                 });
+                const data = await res.json();
 
-                const data = await response.json();
+                // Update Metrics
+                document.getElementById('sapVal').innerText = "$" + Math.round(data.profit_sap / 1000) + "k";
+                document.getElementById('aiVal').innerText = "$" + Math.round(data.profit_ai / 1000) + "k";
 
-                // Update UI
-                animateValue("sapProfit", data.profit_sap);
-                animateValue("aiProfit", data.profit_ai);
-
-                let gain = 0;
-                if (data.profit_sap != 0) {
-                    gain = ((data.profit_ai - data.profit_sap) / Math.abs(data.profit_sap)) * 100;
-                }
-                document.getElementById('gainPercent').innerText = (gain > 0 ? "+" : "") + gain.toFixed(1) + "%";
-                if (gain > 0) document.getElementById('gainPercent').classList.remove("text-red-400");
-                else document.getElementById('gainPercent').classList.add("text-red-400");
+                const gain = ((data.profit_ai - data.profit_sap) / Math.abs(data.profit_sap)) * 100;
+                const gainEl = document.getElementById('gainVal');
+                gainEl.innerText = (gain > 0 ? "+" : "") + gain.toFixed(1) + "%";
+                gainEl.style.color = gain > 0 ? "#4ade80" : "#f87171";
 
                 // Update Chart
-                profitChart.data.labels = data.timeline.x;
-                profitChart.data.datasets[0].data = data.timeline.y_ai;
-                profitChart.data.datasets[1].data = data.timeline.y_sap;
-                profitChart.update();
-
-            } catch (error) {
-                console.error("Simulation Failed:", error);
-                alert("Simulation failed. Check backend logs.");
-            }
-
-            btn.innerText = originalText;
-            btn.disabled = false;
-            btn.classList.remove('opacity-75', 'cursor-not-allowed');
-        }
-
-        async function runAlphaSim() {
-            const start = document.getElementById('startDate').value;
-            const end = document.getElementById('endDate').value;
-            const comm = document.getElementById('commodity').value;
-
-            const btn = document.querySelector('#alphaControls button');
-            btn.innerText = "ANALYZING...";
-            btn.disabled = true;
-
-            try {
-                const response = await fetch('/generate_alpha_chart', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ start_date: start, end_date: end, commodity: comm })
+                if (logisticsChart) logisticsChart.destroy();
+                logisticsChart = new Chart(document.getElementById('logisticsChart'), {
+                    type: 'line',
+                    data: {
+                        labels: data.timeline.x,
+                        datasets: [
+                            { label: 'AgriFlow AI', data: data.timeline.y_ai, borderColor: '#4ade80', backgroundColor: 'rgba(74, 222, 128, 0.1)', fill: true, tension: 0.3 },
+                            { label: 'Traditional', data: data.timeline.y_sap, borderColor: '#94a3b8', borderDash: [5, 5], tension: 0.3 }
+                        ]
+                    },
+                    options: { maintainAspectRatio: false, responsive: true, plugins: { legend: { labels: { color: 'white' } } }, scales: { x: { display: false }, y: { grid: { color: '#334155' } } } }
                 });
 
-                if (response.ok) {
-                    const blob = await response.blob();
-                    const url = URL.createObjectURL(blob);
-                    const img = document.getElementById('alphaImg');
-                    img.src = url;
-                    img.classList.remove('hidden');
-                    document.querySelector('#alphaChartContainer span').classList.add('hidden');
-                } else {
-                    alert("Analysis Failed. Check internet connection for APIs.");
-                }
-            } catch (e) {
-                console.error(e);
-            }
-            btn.innerText = "GENERATE SIGNAL";
-            btn.disabled = false;
+            } catch (e) { alert("Sim Error"); console.log(e); }
+            btn.innerText = original; btn.disabled = false;
         }
 
-        function animateValue(id, value) {
-            const obj = document.getElementById(id);
-            obj.innerText = "$" + value.toLocaleString();
+        async function runPrediction() {
+            const date = document.getElementById('predictDate').value;
+            const ticker = document.getElementById('ticker').value;
+
+            try {
+                const res = await fetch('/predict_event', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ date, ticker })
+                });
+                const data = await res.json();
+
+                if (data.error) { alert(data.error); return; }
+
+                document.getElementById('predEmpty').classList.add('hidden');
+                document.getElementById('predResult').classList.remove('hidden');
+
+                document.getElementById('resDate').innerText = data.date;
+                document.getElementById('resPred').innerText = "$" + data.predicted_price;
+                document.getElementById('resAct').innerText = "$" + data.actual_price;
+                document.getElementById('resSignal').innerText = "SIGNAL: " + data.signal;
+                document.getElementById('resActMove').innerText = "ACTUAL: " + data.actual_move;
+                document.getElementById('resSnow').innerText = data.satellite_data.snow_accumulation_cm + " cm";
+                document.getElementById('resSoil').innerText = data.satellite_data.soil_temp + " °C";
+                document.getElementById('resDelta').innerText = data.delta_percent + "%";
+
+                const badge = document.getElementById('resVerdict');
+                if (data.correct_direction) {
+                    badge.innerText = "CORRECT"; badge.className = "px-3 py-1 bg-green-500 text-black font-bold text-xs rounded uppercase";
+                } else {
+                    badge.innerText = "INCORRECT"; badge.className = "px-3 py-1 bg-red-500 text-black font-bold text-xs rounded uppercase";
+                }
+
+            } catch (e) { console.error(e); }
+        }
+
+        async function runBacktest() {
+            const btn = document.querySelector('button[onclick="runBacktest()"] span');
+            btn.innerText = "SIMULATING Q1...";
+            document.getElementById('btOverlay').classList.add('hidden');
+
+            const ticker = document.getElementById('ticker').value;
+
+            try {
+                const res = await fetch('/run_backtest', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ start: '2024-01-01', end: '2024-03-31', ticker })
+                });
+                const data = await res.json();
+
+                document.getElementById('backtestStats').classList.remove('opacity-50');
+                document.getElementById('btAcc').innerText = data.accuracy + "%";
+                document.getElementById('btRoi').innerText = (data.roi > 0 ? "+" : "") + data.roi + "%";
+                if (data.roi > 0) document.getElementById('btRoi').className = "text-2xl font-bold text-green-400";
+
+                // Curve Chart
+                if (backtestChart) backtestChart.destroy();
+                const labels = data.curve.map(x => x.date);
+                const vals = data.curve.map(x => x.equity);
+
+                backtestChart = new Chart(document.getElementById('backtestChart'), {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{ label: 'Portfolio Equity ($)', data: vals, borderColor: '#22d3ee', backgroundColor: 'rgba(34, 211, 238, 0.1)', fill: true, tension: 0.4 }]
+                    },
+                    options: { maintainAspectRatio: false, responsive: true, plugins: { legend: { display: false } }, scales: { x: { display: false }, y: { grid: { color: '#334155' } } } }
+                });
+
+
+            } catch (e) { console.error(e); }
+            btn.innerText = "RUN Q1 2024 BACKTEST";
         }
     </script>
 </body>
