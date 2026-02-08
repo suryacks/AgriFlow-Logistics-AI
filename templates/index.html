@@ -236,18 +236,31 @@
                             </div>
                         </div>
 
-                        <div class="space-y-2">
-                            <div class="flex justify-between text-xs border-b border-slate-800 py-2">
-                                <span class="text-slate-500">Snow Accumulation (3d)</span>
-                                <span id="resSnow" class="text-white">12.4 cm</span>
-                            </div>
-                            <div class="flex justify-between text-xs border-b border-slate-800 py-2">
-                                <span class="text-slate-500">Est. Soil Temp</span>
-                                <span id="resSoil" class="text-white">-4.2 C</span>
-                            </div>
-                            <div class="flex justify-between text-xs py-2">
-                                <span class="text-slate-500">Error Delta</span>
-                                <span id="resDelta" class="text-green-400">0.12%</span>
+                        <div class="space-y-2 mt-4 pt-4 border-t border-slate-800">
+                            <h4 class="text-[10px] text-slate-500 uppercase font-bold text-center mb-2">Multi-Source
+                                Intelligence</h4>
+
+                            <div class="grid grid-cols-2 gap-2 text-xs">
+                                <div class="flex justify-between border-b border-slate-800/50 p-1">
+                                    <span class="text-slate-500"><i class="fas fa-satellite text-cyan-500/50"></i> Soil
+                                        Moist</span>
+                                    <span id="resSoil" class="text-white">--</span>
+                                </div>
+                                <div class="flex justify-between border-b border-slate-800/50 p-1">
+                                    <span class="text-slate-500"><i class="fas fa-traffic-light text-red-500/50"></i>
+                                        Traffic Idx</span>
+                                    <span id="resTraffic" class="text-white">--</span>
+                                </div>
+                                <div class="flex justify-between border-b border-slate-800/50 p-1">
+                                    <span class="text-slate-500"><i class="fas fa-car-crash text-yellow-500/50"></i>
+                                        Accident Risk</span>
+                                    <span id="resAccident" class="text-white">--</span>
+                                </div>
+                                <div class="flex justify-between border-b border-slate-800/50 p-1">
+                                    <span class="text-slate-500"><i class="fas fa-gas-pump text-green-500/50"></i> Oil
+                                        Cost</span>
+                                    <span id="resOil" class="text-white">--</span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -386,9 +399,12 @@
                 document.getElementById('resAct').innerText = "$" + data.actual_price;
                 document.getElementById('resSignal').innerText = "SIGNAL: " + data.signal;
                 document.getElementById('resActMove').innerText = "ACTUAL: " + data.actual_move;
-                document.getElementById('resSnow').innerText = data.satellite_data.snow_accumulation_cm + " cm";
-                document.getElementById('resSoil').innerText = data.satellite_data.soil_temp + " °C";
-                document.getElementById('resDelta').innerText = data.delta_percent + "%";
+
+                // New Sat Data Fields
+                document.getElementById('resSoil').innerText = data.satellite_data.soil_moisture + " (Idx)";
+                document.getElementById('resTraffic').innerText = data.satellite_data.traffic_stress_index + " (Chaos)";
+                document.getElementById('resAccident').innerText = data.satellite_data.accident_risk_score + " (Risk)";
+                document.getElementById('resOil').innerText = "$" + data.macro_data.oil_price;
 
                 const badge = document.getElementById('resVerdict');
                 if (data.correct_direction) {
