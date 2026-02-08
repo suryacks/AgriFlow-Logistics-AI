@@ -15,6 +15,10 @@ class AgriAlphaPredictor:
         Creates 'Lag Features' so we only use PAST data to predict FUTURE price.
         Uses 12+ Signal Sources.
         """
+        if 'date' not in df.columns:
+             print("DEBUG: DF Missing Date Column:", df.columns)
+             return pd.DataFrame()
+
         df = df.copy()
         df = df.sort_values('date')
         
@@ -129,9 +133,12 @@ class AgriAlphaPredictor:
         w = self.feed.get_weather_data(start_date=buffer_start, end_date=end_date)
         m = self.feed.get_market_data(ticker, start_date=buffer_start, end_date=end_date)
         
-        if m.empty: return {"error": "Market Data Failed"}
+        if m.empty: return {"error": f"Market Data Failed for {ticker}"}
+        if w.empty: return {"error": "Weather Data Failed (Satellite API)"}
         
         df = self.feed.merge_data(w, m)
+        if df.empty: return {"error": "No overlapping dates between Market and Weather data."}
+        
         df_ml = self.prepare_features(df)
         
         eval_dates = df_ml[(df_ml['date'] >= pd.to_datetime(start_date)) & (df_ml['date'] <= pd.to_datetime(end_date))]

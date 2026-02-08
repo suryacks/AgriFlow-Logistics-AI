@@ -79,69 +79,79 @@ class MarketFeed:
 
     def get_market_data(self, ticker="DC=F", start_date="2024-01-01", end_date="2024-03-31"):
         """
-        Fetches Target Commodity + MACRO CONTEXT (Oil, Bonds, SPX).
-        Implements rigorous Forward-Filling to handle weekends.
+        Fetches Target Commodity + MACRO CONTEXT.
         """
-        # List of tickers to fetch
-        # CL=F: Crude Oil (Logistics Cost)
-        # ^TNX: 10-Yr Treasury (Macro)
-        # ^GSPC: S&P 500 (Sentiment)
-        tickers = [ticker, "CL=F", "^TNX", "^GSPC"]
-        
         try:
-            # Download all at once
-            data = yf.download(tickers, start=start_date, end=end_date, progress=False, group_by='ticker', timeout=10)
-            
-            if data.empty:
+            # 1. Fetch Target Asset
+            df_target = yf.download(ticker, start=start_date, end=end_date, progress=False)
+            if df_target.empty:
+                print(f"Warning: No data for {ticker}")
                 return pd.DataFrame()
+
+            # Flatten YF MultiIndex if present
+            if isinstance(df_target.columns, pd.MultiIndex):
+                # Dropping the 'Ticker' level, keeping 'Price Type'
+                df_target.columns = df_target.columns.get_level_values(0)
+
+            # Standardize
+            df_target = df_target.reset_index()
+            # YFinance sometimes returns 'Date' or 'Datetime'
+            if 'Date' in df_target.columns:
+                df_target.rename(columns={'Date': 'date'}, inplace=True)
+            elif 'Datetime' in df_target.columns: # For intraday
+                df_target.rename(columns={'Datetime': 'date'}, inplace=True)
+                
+            cols_map = {'Close': 'price', 'Adj Close': 'price'}
+            df_target.rename(columns=cols_map, inplace=True)
             
-            # Helper to extract Close price for a ticker
-            def extract_close(t):
-                if isinstance(data.columns, pd.MultiIndex):
-                    try:
-                        return data[t]['Close']
-                    except KeyError:
-                        return pd.Series()
+            if 'price' not in df_target.columns:
+                # If ticker name is the column
+                if ticker in df_target.columns:
+                     df_target.rename(columns={ticker: 'price'}, inplace=True)
                 else:
-                    return data['Close'] if t == ticker else pd.Series()
+                     # Fallback: Take last column
+                     df_target['price'] = df_target.iloc[:, -1]
 
-            df_main = pd.DataFrame()
-            
-            # Primary Ticker
-            s_main = extract_close(ticker)
-            if s_main.empty:
-                # Try simple naming if group_by failed
-                if ticker in data.columns: s_main = data[ticker]
-                elif 'Close' in data.columns: s_main = data['Close']
-            
-            if s_main.empty:
-                print(f"CRITICAL: Could not find price for {ticker}")
-                return pd.DataFrame()
+            df_target = df_target[['date', 'price']].copy()
+            df_target['date'] = pd.to_datetime(df_target['date']).dt.tz_localize(None) # Remove TZ for easier merge
 
-            df_main['date'] = s_main.index
-            df_main['price'] = s_main.values
+            # 2. Fetch Macro Context (Oil, Bond, SPX)
+            # We fetch these separately to avoid the complex MultiIndex merging logic of bulk download
+            # We assume these are highly liquid and always available
+            macro_tickers = {"CL=F": "oil_price", "^TNX": "bond_yield", "^GSPC": "spx_level"}
             
-            # Aux Tickers (Macro Context)
-            s_oil = extract_close("CL=F")
-            s_bond = extract_close("^TNX")
-            s_spx = extract_close("^GSPC")
+            df_macro = yf.download(list(macro_tickers.keys()), start=start_date, end=end_date, progress=False)
             
-            # Alignment is automatic by index if we used join, but let's be safe with lists
-            # We need to reindex everything to the main ticker's dates
-            df_main.set_index('date', inplace=True)
+            # Handle Macro MultiIndex
+            # Structure: (Price, Ticker)
+            if isinstance(df_macro.columns, pd.MultiIndex):
+                # We want 'Close' for each ticker
+                try:
+                    df_macro = df_macro['Close']
+                except:
+                     pass # Fallback
+
+            df_macro = df_macro.reset_index()
+            if 'Date' in df_macro.columns: df_macro.rename(columns={'Date': 'date'}, inplace=True)
             
-            df_main['oil_price'] = s_oil
-            df_main['bond_yield'] = s_bond
-            df_main['spx_level'] = s_spx
+            df_macro['date'] = pd.to_datetime(df_macro['date']).dt.tz_localize(None)
+
+            # Rename columns to our internal names
+            df_macro.rename(columns=macro_tickers, inplace=True)
             
-            # KEY FIX: FILL MISSING DATA (Weekends/Holidays carry over previous close)
-            df_main = df_main.ffill().bfill()
+            # 3. Merge Target + Macro
+            # Left join on Target to preserve our asset's timeline
+            df_final = pd.merge(df_target, df_macro, on='date', how='left')
             
-            df_main = df_main.reset_index()
-            return df_main
+            # Fill Missing Macro Data (Weekends/Holidays)
+            df_final = df_final.ffill().bfill()
             
+            return df_final
+
         except Exception as e:
-            print(f"Macro Data Error: {e}")
+            print(f"Market Data Error: {e}")
+            import traceback
+            traceback.print_exc()
             return pd.DataFrame()
 
     def merge_data(self, df_weather, df_market):
