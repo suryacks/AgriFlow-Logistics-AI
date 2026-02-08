@@ -40,6 +40,71 @@
             animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
         }
 
+        /* Loading Button Animation */
+        .loading-btn {
+            position: relative;
+            overflow: hidden;
+            pointer-events: none;
+            color: transparent !important;
+            /* Hide text */
+        }
+
+        .loading-btn::after {
+            content: "PROCESSING DATA...";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #000;
+            font-weight: bold;
+            font-size: 10px;
+            z-index: 2;
+        }
+
+        .loading-btn::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            background: linear-gradient(90deg, #22d3ee, #4ade80);
+            width: 0%;
+            animation: loadBar 3s ease-in-out forwards;
+            z-index: 1;
+        }
+
+        @keyframes loadBar {
+            0% {
+                width: 0%;
+            }
+
+            20% {
+                width: 10%;
+            }
+
+            50% {
+                width: 40%;
+            }
+
+            80% {
+                width: 80%;
+            }
+
+            95% {
+                width: 95%;
+            }
+
+            100% {
+                width: 95%;
+            }
+
+            /* Stalls at 95 until done */
+        }
+
         /* Flow Animation */
         .flow-container {
             position: relative;
@@ -258,13 +323,20 @@
                         <div id="predEmpty" class="h-full flex flex-col items-center justify-center text-slate-600"><i
                                 class="fas fa-search mb-2 text-xl"></i><span class="text-[10px]">No Prediction
                                 Yet.</span></div>
+
+                        <!-- HOURLY CHART (New) -->
+                        <div id="hourlyResult" class="hidden mt-4 pt-4 border-t border-slate-700 h-40 relative">
+                            <h4 class="text-[10px] font-bold text-slate-500 uppercase mb-2">INTRADAY FORECAST (Hourly)
+                            </h4>
+                            <canvas id="hourlyChart"></canvas>
+                        </div>
                     </div>
 
-                    # Backtest Controls
+                    <!-- Backtest Controls -->
                     <div class="glass-dark p-6">
                         <label class="text-[10px] text-slate-500 uppercase">Full simulation (Win Rate)</label>
-                        <button onclick="runBacktest()"
-                            class="w-full mt-2 py-3 border border-slate-700 hover:border-cyan-500 text-slate-300 hover:text-white text-xs font-bold rounded transition-all flex justify-center items-center space-x-2">
+                        <button id="btnBacktest" onclick="runBacktest()"
+                            class="w-full mt-2 py-3 border border-slate-700 hover:border-cyan-500 text-slate-300 hover:text-white text-xs font-bold rounded transition-all flex justify-center items-center space-x-2 relative">
                             <span>RUN Q1 2024 BACKTEST</span>
                             <i class="fas fa-play"></i>
                         </button>
@@ -308,8 +380,8 @@
                     <div class="flex flex-col items-center space-y-2">
                         <div
                             class="w-16 h-16 rounded-full bg-slate-800 border border-slate-600 flex items-center justify-center text-2xl text-cyan-400 shadow-[0_0_20px_rgba(34,211,238,0.2)]">
-                            <i class="fas fa-satellite"></i></div><span
-                            class="text-xs font-bold text-slate-400">SATELLITE DATA</span>
+                            <i class="fas fa-satellite"></i>
+                        </div><span class="text-xs font-bold text-slate-400">SATELLITE DATA</span>
                     </div>
                     <div class="flex-1 h-1 bg-slate-800 relative mx-4">
                         <div
@@ -319,21 +391,24 @@
                     <div class="flex flex-col items-center space-y-2">
                         <div
                             class="w-16 h-16 rounded-full bg-slate-800 border border-slate-600 flex items-center justify-center text-2xl text-yellow-400 shadow-[0_0_20px_rgba(250,204,21,0.2)]">
-                            <i class="fas fa-truck"></i></div><span class="text-xs font-bold text-slate-400">PHYSICS
+                            <i class="fas fa-truck"></i>
+                        </div><span class="text-xs font-bold text-slate-400">PHYSICS
                             TWIN</span>
                     </div>
                     <div class="flex-1 h-1 bg-slate-800 relative mx-4"></div>
                     <div class="flex flex-col items-center space-y-2">
                         <div
                             class="w-16 h-16 rounded-full bg-slate-800 border border-slate-600 flex items-center justify-center text-2xl text-purple-400 shadow-[0_0_20px_rgba(192,132,252,0.2)]">
-                            <i class="fas fa-brain"></i></div><span class="text-xs font-bold text-slate-400">GRADIENT
+                            <i class="fas fa-brain"></i>
+                        </div><span class="text-xs font-bold text-slate-400">GRADIENT
                             BOOSTING</span>
                     </div>
                     <div class="flex-1 h-1 bg-slate-800 relative mx-4"></div>
                     <div class="flex flex-col items-center space-y-2">
                         <div
                             class="w-16 h-16 rounded-full bg-green-900/50 border border-green-500 flex items-center justify-center text-2xl text-green-400 shadow-[0_0_30px_rgba(74,222,128,0.4)]">
-                            <i class="fas fa-chart-line"></i></div><span class="text-xs font-bold text-green-400">ALPHA
+                            <i class="fas fa-chart-line"></i>
+                        </div><span class="text-xs font-bold text-green-400">ALPHA
                             SIGNAL</span>
                     </div>
                 </div>
@@ -345,7 +420,7 @@
 
     <script>
         // GLOBALS
-        let logisticsChart, equityChart, priceChart;
+        let logisticsChart, equityChart, priceChart, hourlyChart;
 
         // --- NAVIGATION ---
         function setMode(mode) {
@@ -407,14 +482,21 @@
         }
 
         async function runPrediction() {
+            const btn = document.querySelector('button[onclick="runPrediction()"]');
+            btn.classList.add('loading-btn'); // Start Loading Bar
+
             const date = document.getElementById('predictDate').value;
             const ticker = document.getElementById('ticker').value;
             try {
                 const res = await fetch('/predict_event', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ date, ticker }) });
                 const data = await res.json();
+                btn.classList.remove('loading-btn'); // Stop Loading
+
                 if (data.error) { alert(data.error); return; }
                 document.getElementById('predEmpty').classList.add('hidden');
                 document.getElementById('predResult').classList.remove('hidden');
+                document.getElementById('hourlyResult').classList.remove('hidden');
+
                 document.getElementById('resDate').innerText = data.date;
                 document.getElementById('resPred').innerText = "$" + data.predicted_price;
                 document.getElementById('resAct').innerText = "$" + data.actual_price;
@@ -425,23 +507,57 @@
                 const badge = document.getElementById('resVerdict');
                 if (data.correct_direction) { badge.innerText = "CORRECT"; badge.className = "px-2 py-1 bg-green-500 text-black font-bold text-[10px] rounded uppercase"; }
                 else { badge.innerText = "INCORRECT"; badge.className = "px-2 py-1 bg-red-500 text-black font-bold text-[10px] rounded uppercase"; }
-            } catch (e) { console.error(e); }
+
+                // HOURLY CHART RENDERING
+                if (data.hourly_forecast) {
+                    if (hourlyChart) hourlyChart.destroy();
+                    const h_labels = data.hourly_forecast.map(x => x.hour);
+                    const h_prices = data.hourly_forecast.map(x => x.price);
+
+                    hourlyChart = new Chart(document.getElementById('hourlyChart'), {
+                        type: 'line',
+                        data: {
+                            labels: h_labels,
+                            datasets: [{
+                                label: 'Intraday Forecast',
+                                data: h_prices,
+                                borderColor: '#22d3ee', borderWidth: 2, pointRadius: 0,
+                                tension: 0.4
+                            }]
+                        },
+                        options: {
+                            maintainAspectRatio: false, responsie: true,
+                            plugins: { legend: { display: false } },
+                            scales: { x: { display: false }, y: { display: false } }
+                        }
+                    });
+                }
+
+            } catch (e) {
+                console.error(e);
+                btn.classList.remove('loading-btn');
+                alert("Prediction Error");
+            }
         }
 
         async function runBacktest() {
-            const btn = document.querySelector('button[onclick="runBacktest()"] span');
-            btn.innerText = "SIMULATING...";
+            const btn = document.getElementById('btnBacktest');
+            btn.classList.add('loading-btn'); // Loading Bar
+            const originalText = btn.innerHTML;
+
             const ticker = document.getElementById('ticker').value;
             try {
                 const res = await fetch('/run_backtest', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ start: '2024-01-01', end: '2024-03-31', ticker }) });
                 const data = await res.json();
-                if (data.error) { alert(data.error); btn.innerText = "RUN BACKTEST"; return; }
+
+                btn.classList.remove('loading-btn'); // Stop Loading
+
+                if (data.error) { alert(data.error); return; }
 
                 document.getElementById('backtestStats').classList.remove('opacity-50');
                 document.getElementById('btAcc').innerText = data.accuracy + "%";
                 document.getElementById('btRoi').innerText = (data.roi > 0 ? "+" : "") + data.roi + "%";
                 document.getElementById('btRoi').className = data.roi > 0 ? "text-xl font-bold text-green-400" : "text-xl font-bold text-red-400";
-
                 const labels = data.curve.map(x => x.date);
 
                 // Chart 1: Equity
