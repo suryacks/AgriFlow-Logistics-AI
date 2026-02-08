@@ -37,32 +37,44 @@ def run_backtest():
 
 @app.route('/run_simulation', methods=['POST'])
 def run_simulation():
-    data = request.json
-    fleet_size = int(data.get('fleet_size', 50))
-    traffic_prob = float(data.get('traffic_prob', 0.1))
-    heat_factor = float(data.get('heat_factor', 0.5))
-    steps = int(data.get('steps', 500))
-    
-    # Run the Digital Twin
-    df, p_sap, p_ai = engine.run_simulation(
-        fleet_size_input=fleet_size,
-        enable_traffic=True,
-        heat_start=heat_factor,
-        traffic_prob=traffic_prob,
-        simulation_steps=steps
-    )
-    
-    # Prepare JSON response
-    response = {
-        'profit_sap': float(p_sap),
-        'profit_ai': float(p_ai),
-        'timeline': {
-            'x': df['Step'].tolist(),
-            'y_sap': df['Traditional (SAP)'].tolist(),
-            'y_ai': df['AgriFlow (AI)'].tolist()
+    try:
+        data = request.json
+        print(f"DEBUG: Received Payload: {data}")
+        
+        # Explicit Casting with Default Fallbacks
+        fleet_size = int(data.get('fleet_size', 50))
+        traffic_prob = float(data.get('traffic_prob', 0.1))
+        heat_factor = float(data.get('heat_factor', 0.5))
+        steps = int(data.get('steps', 500))
+        
+        print(f"DEBUG: Running Sim with Fleet={fleet_size}, Traffic={traffic_prob}, Heat={heat_factor}")
+        
+        # Run the Digital Twin
+        df, p_sap, p_ai = engine.run_simulation(
+            fleet_size_input=fleet_size,
+            enable_traffic=True,
+            heat_start=heat_factor,
+            traffic_prob=traffic_prob,
+            simulation_steps=steps
+        )
+        
+        # Prepare JSON response
+        response = {
+            'profit_sap': float(p_sap),
+            'profit_ai': float(p_ai),
+            'timeline': {
+                'x': df['Step'].tolist(),
+                'y_sap': df['Traditional (SAP)'].tolist(),
+                'y_ai': df['AgriFlow (AI)'].tolist()
+            }
         }
-    }
-    return jsonify(response)
+        return jsonify(response)
+        
+    except Exception as e:
+        import traceback
+        error_msg = traceback.format_exc()
+        print(f"CRITICAL SIM ERROR: {error_msg}")
+        return jsonify({"error": str(e), "trace": error_msg}), 500
 
 @app.route('/generate_alpha_chart', methods=['POST'])
 def generate_alpha():
