@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AgriFlow V3.1: Logistics-to-Alpha</title>
+    <title>AgriFlow V3.2: Logistics-to-Alpha</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Chart.js -->
@@ -251,27 +251,28 @@
                             </div>
                         </div>
                         <div class="space-y-2 mt-4 pt-4 border-t border-slate-800">
-                            <h4 class="text-[10px] text-slate-500 uppercase font-bold text-center mb-2">Multi-Source
-                                Intelligence</h4>
+                            <h4 class="text-[10px] text-slate-500 uppercase font-bold text-center mb-2">Proprietary
+                                Signal Detection</h4>
                             <div class="grid grid-cols-2 gap-2 text-xs">
                                 <div class="flex justify-between border-b border-slate-800/50 p-1"><span
                                         class="text-slate-500"><i class="fas fa-satellite text-cyan-500/50"></i> Soil
                                         Moist</span><span id="resSoil" class="text-white">--</span></div>
                                 <div class="flex justify-between border-b border-slate-800/50 p-1"><span
                                         class="text-slate-500"><i class="fas fa-traffic-light text-red-500/50"></i>
-                                        Traffic Idx</span><span id="resTraffic" class="text-white">--</span></div>
+                                        Traf. Idx</span><span id="resTraffic" class="text-white">--</span></div>
                                 <div class="flex justify-between border-b border-slate-800/50 p-1"><span
-                                        class="text-slate-500"><i class="fas fa-car-crash text-yellow-500/50"></i>
-                                        Accident Risk</span><span id="resAccident" class="text-white">--</span></div>
+                                        class="text-slate-500"><i class="fas fa-car-crash text-yellow-500/50"></i> Acc.
+                                        Risk</span><span id="resAccident" class="text-white">--</span></div>
                                 <div class="flex justify-between border-b border-slate-800/50 p-1"><span
-                                        class="text-slate-500"><i class="fas fa-gas-pump text-green-500/50"></i> Oil
-                                        Cost</span><span id="resOil" class="text-white">--</span></div>
+                                        class="text-slate-500 font-bold text-purple-400"><i class="fas fa-brain"></i>
+                                        LOGISTICS BREAKAGE</span><span id="resBreakage"
+                                        class="text-purple-300 font-bold">--</span></div>
                             </div>
                         </div>
                     </div>
                     <div id="predEmpty" class="h-64 flex flex-col items-center justify-center text-slate-600"><i
-                            class="fas fa-search mb-2 text-2xl"></i><span class="text-xs">Select a date to travel back
-                            in time.</span></div>
+                            class="fas fa-search mb-2 text-2xl"></i><span class="text-xs">Select a date (Weekend
+                            auto-fetches next trading day).</span></div>
                 </div>
 
                 <!-- Right: Backtest Results -->
@@ -451,7 +452,8 @@
                 document.getElementById('resSoil').innerText = (soil === 0 ? "N/A" : soil) + " (Idx)";
                 document.getElementById('resTraffic').innerText = data.satellite_data.traffic_stress_index + " (Chaos)";
                 document.getElementById('resAccident').innerText = data.satellite_data.accident_risk_score + " (Risk)";
-                document.getElementById('resOil').innerText = "$" + data.macro_data.oil_price;
+                // PROPRIETARY LAYER DISPLAY
+                document.getElementById('resBreakage').innerText = data.satellite_data.logistics_disruption_score + "/100";
 
                 const badge = document.getElementById('resVerdict');
                 if (data.correct_direction) { badge.innerText = "CORRECT"; badge.className = "px-3 py-1 bg-green-500 text-black font-bold text-xs rounded uppercase"; }
@@ -479,6 +481,7 @@
                 const labels = data.curve.map(x => x.date);
                 const equity = data.curve.map(x => x.equity);
                 const asset = data.curve.map(x => x.asset_price);
+                const predicted = data.curve.map(x => x.predicted_price);
 
                 backtestChart = new Chart(document.getElementById('backtestChart'), {
                     type: 'line',
@@ -492,10 +495,16 @@
                                 fill: true, tension: 0.4, yAxisID: 'y'
                             },
                             {
-                                label: 'Asset Price ($)',
+                                label: 'Actual Price ($)',
                                 data: asset,
                                 borderColor: '#fbbf24', borderDash: [5, 5], pointRadius: 0,
                                 tension: 0.1, yAxisID: 'y1'
+                            },
+                            {
+                                label: 'Predicted Price ($)',
+                                data: predicted,
+                                borderColor: '#d946ef', pointRadius: 1, showLine: false, // Dots only
+                                yAxisID: 'y1'
                             }
                         ]
                     },
