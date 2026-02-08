@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AgriFlow V2: Logistics-to-Alpha</title>
+    <title>AgriFlow V3: Logistics-to-Alpha</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Chart.js -->
@@ -236,6 +236,7 @@
                             </div>
                         </div>
 
+                        <!-- 12-FACTOR DATA DISPLAY -->
                         <div class="space-y-2 mt-4 pt-4 border-t border-slate-800">
                             <h4 class="text-[10px] text-slate-500 uppercase font-bold text-center mb-2">Multi-Source
                                 Intelligence</h4>
@@ -348,7 +349,12 @@
                         heat_factor: document.getElementById('heatFactor').value,
                     })
                 });
+
                 const data = await res.json();
+
+                if (!res.ok) {
+                    throw new Error(data.error || "Unknown Backend Error");
+                }
 
                 // Update Metrics
                 document.getElementById('sapVal').innerText = "$" + Math.round(data.profit_sap / 1000) + "k";
@@ -373,7 +379,10 @@
                     options: { maintainAspectRatio: false, responsive: true, plugins: { legend: { labels: { color: 'white' } } }, scales: { x: { display: false }, y: { grid: { color: '#334155' } } } }
                 });
 
-            } catch (e) { alert("Sim Error"); console.log(e); }
+            } catch (e) {
+                alert("Sim Error: " + e.message);
+                console.error("Simulation Execution Failed:", e);
+            }
             btn.innerText = original; btn.disabled = false;
         }
 
