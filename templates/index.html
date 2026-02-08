@@ -184,15 +184,15 @@
             <div id="viewLogistics" class="h-full flex flex-col space-y-6">
                 <div class="grid grid-cols-3 gap-6 h-32">
                     <div class="glass-dark p-4 flex flex-col justify-center border-l-2 border-slate-700">
-                        <span class="text-xs text-slate-500 uppercase font-bold">Baseline Profit</span>
+                        <span class="text-xs text-slate-500 uppercase font-bold">Legacy Cost (High)</span>
                         <span id="sapVal" class="text-2xl font-mono text-slate-300 mt-1">--</span>
                     </div>
                     <div class="glass-dark p-4 flex flex-col justify-center border-l-2 border-green-500 bg-green-500/5">
-                        <span class="text-xs text-green-400 uppercase font-bold">AgriFlow Profit</span>
+                        <span class="text-xs text-green-400 uppercase font-bold">AgriFlow Cost (Low)</span>
                         <span id="aiVal" class="text-3xl font-mono text-white mt-1 neon-green">--</span>
                     </div>
                     <div class="glass-dark p-4 flex flex-col justify-center">
-                        <span class="text-xs text-slate-500 uppercase font-bold">Optimization Delta</span>
+                        <span class="text-xs text-slate-500 uppercase font-bold">Cost Reduction</span>
                         <span id="gainVal" class="text-2xl font-bold text-white mt-1">--</span>
                     </div>
                 </div>
@@ -356,14 +356,17 @@
                     throw new Error(data.error || "Unknown Backend Error");
                 }
 
-                // Update Metrics
-                document.getElementById('sapVal').innerText = "$" + Math.round(data.profit_sap / 1000) + "k";
-                document.getElementById('aiVal').innerText = "$" + Math.round(data.profit_ai / 1000) + "k";
+                // Update Metrics (COST: LOWER IS BETTER)
+                document.getElementById('sapVal').innerText = "$" + Math.round(data.cost_sap / 1000) + "k";
+                document.getElementById('aiVal').innerText = "$" + Math.round(data.cost_ai / 1000) + "k";
 
-                const gain = ((data.profit_ai - data.profit_sap) / Math.abs(data.profit_sap)) * 100;
+                // Calculate Savings (Reduction in Cost)
+                // If SAP Cost = 100, AI Cost = 80, Saving = (100-80)/100 = 20%
+                const savings = ((data.cost_sap - data.cost_ai) / Math.abs(data.cost_sap)) * 100;
+
                 const gainEl = document.getElementById('gainVal');
-                gainEl.innerText = (gain > 0 ? "+" : "") + gain.toFixed(1) + "%";
-                gainEl.style.color = gain > 0 ? "#4ade80" : "#f87171";
+                gainEl.innerText = (savings > 0 ? "-" : "+") + Math.abs(savings).toFixed(1) + "%"; // "Lower is better" so -20% is Good.
+                gainEl.style.color = savings > 0 ? "#4ade80" : "#f87171"; // Green if we SAVED money (Positive Savings)
 
                 // Update Chart
                 if (logisticsChart) logisticsChart.destroy();
@@ -372,11 +375,22 @@
                     data: {
                         labels: data.timeline.x,
                         datasets: [
-                            { label: 'AgriFlow AI', data: data.timeline.y_ai, borderColor: '#4ade80', backgroundColor: 'rgba(74, 222, 128, 0.1)', fill: true, tension: 0.3 },
-                            { label: 'Traditional', data: data.timeline.y_sap, borderColor: '#94a3b8', borderDash: [5, 5], tension: 0.3 }
+                            { label: 'AgriFlow Cost', data: data.timeline.y_ai, borderColor: '#4ade80', backgroundColor: 'rgba(74, 222, 128, 0.1)', fill: true, tension: 0.3 },
+                            { label: 'Traditional Cost', data: data.timeline.y_sap, borderColor: '#94a3b8', borderDash: [5, 5], tension: 0.3 }
                         ]
                     },
-                    options: { maintainAspectRatio: false, responsive: true, plugins: { legend: { labels: { color: 'white' } } }, scales: { x: { display: false }, y: { grid: { color: '#334155' } } } }
+                    options: {
+                        maintainAspectRatio: false,
+                        responsive: true,
+                        plugins: { legend: { labels: { color: 'white' } } },
+                        scales: {
+                            x: { display: false },
+                            y: {
+                                grid: { color: '#334155' },
+                                title: { display: true, text: 'Cumulative Cost ($)', color: '#64748b' }
+                            }
+                        }
+                    }
                 });
 
             } catch (e) {

@@ -153,6 +153,8 @@ class SimulationEngine:
             'AgriFlow (AI)': agri_cum_profit[:min_len]
         })
         
+        return df, current_sap_profit, current_agri_profit
+        
     def obtain_stress_score(self, traffic_intensity, heat_intensity):
         """
         Runs the AgileFlow RL Agent on a 'Digital Twin' of the specified weather conditions.

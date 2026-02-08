@@ -58,10 +58,21 @@ def run_simulation():
             simulation_steps=steps
         )
         
+        # User Request: "Make costs positive... smaller is better".
+        # We invert Profit to represent "Operational Deficit/Cost".
+        # If Profit is negative (Loss), Cost is Positive.
+        # If Profit is positive (Gain), Cost is Negative (Surplus).
+        cost_sap = -float(p_sap)
+        cost_ai = -float(p_ai)
+        
+        # Invert the timeline curves too for the chart
+        df['Traditional (SAP)'] = -df['Traditional (SAP)']
+        df['AgriFlow (AI)'] = -df['AgriFlow (AI)']
+        
         # Prepare JSON response
         response = {
-            'profit_sap': float(p_sap),
-            'profit_ai': float(p_ai),
+            'cost_sap': cost_sap,
+            'cost_ai': cost_ai,
             'timeline': {
                 'x': df['Step'].tolist(),
                 'y_sap': df['Traditional (SAP)'].tolist(),
