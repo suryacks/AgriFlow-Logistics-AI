@@ -553,6 +553,7 @@
 
         // --- UI UTILS ---
         let isFullscreen = false;
+        let isFullscreen = false;
         function toggleFullscreen() {
             const card = document.getElementById('cardSingleEvent');
             const icon = card.querySelector('.fa-expand, .fa-compress');
@@ -560,13 +561,13 @@
 
             if (isFullscreen) {
                 // Expand
-                card.classList.remove('col-span-4', 'h-[600px]');
-                card.classList.add('fixed', 'inset-4', 'z-50', 'h-auto', 'w-auto');
+                card.classList.remove('h-[600px]', 'relative'); // Remove height constraint
+                card.classList.add('fixed', 'inset-4', 'z-50', 'h-[95vh]');
                 if (icon) { icon.classList.remove('fa-expand'); icon.classList.add('fa-compress'); }
             } else {
                 // Contract
-                card.classList.remove('fixed', 'inset-4', 'z-50', 'h-auto', 'w-auto');
-                card.classList.add('col-span-4', 'h-[600px]');
+                card.classList.remove('fixed', 'inset-4', 'z-50', 'h-[95vh]');
+                card.classList.add('h-[600px]', 'relative'); // Restore
                 if (icon) { icon.classList.remove('fa-compress'); icon.classList.add('fa-expand'); }
             }
             // Trigger Chart Resize
