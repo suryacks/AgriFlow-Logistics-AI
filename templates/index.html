@@ -291,6 +291,7 @@
             <!-- VIEW: ALPHA (Split Views) -->
             <div id="viewAlpha" class="h-full hidden grid grid-cols-12 gap-6 overflow-y-auto">
                 <!-- Left: Single Event (Expandable) -->
+                <!-- Left: Single Event (Expandable) -->
                 <div id="cardSingleEvent"
                     class="col-span-4 flex flex-col space-y-4 h-[600px] transition-all duration-500 ease-in-out z-40">
                     <div class="glass-dark flex-1 p-6 relative flex flex-col overflow-hidden">
@@ -321,9 +322,10 @@
                             <!-- Middle: Prices & Error -->
                             <div class="grid grid-cols-2 gap-3">
                                 <div class="bg-slate-800/80 p-3 rounded-lg border border-slate-700">
-                                    <div class="text-[9px] text-cyan-400 font-bold uppercase mb-1">AI Prediction</div>
+                                    <div class="text-[9px] text-cyan-400 font-bold uppercase mb-1">AI Prediction (Close)
+                                    </div>
                                     <div id="resPred" class="text-2xl font-bold text-white">--</div>
-                                    <div class="text-[9px] text-slate-500 mt-1">ERROR: <span id="resDelta"
+                                    <div class="text-[9px] text-slate-500 mt-1">Delta: <span id="resDelta"
                                             class="text-white font-mono">--</span></div>
                                 </div>
                                 <div class="bg-slate-800/80 p-3 rounded-lg border border-slate-700">
@@ -334,27 +336,41 @@
                                 </div>
                             </div>
 
-                            <!-- Middle: Logistics & Satellite -->
+                            <!-- Middle: PROPRIETARY DATA STREAMS -->
                             <div class="space-y-2 pt-2">
                                 <h4
-                                    class="text-[10px] text-slate-500 uppercase font-bold text-center border-b border-slate-800 pb-1">
-                                    Satellite Intelligence</h4>
-                                <div class="grid grid-cols-2 gap-x-4 gap-y-2 text-xs">
-                                    <div class="flex justify-between px-1"><span class="text-slate-500">Logistics
-                                            Stress</span><span id="resTraffic" class="text-white font-mono">--</span>
+                                    class="text-[10px] text-purple-400 uppercase font-bold text-center border-b border-slate-800 pb-1 flex justify-center items-center">
+                                    <i class="fas fa-satellite mr-1"></i> Proprietary Signals (Live)
+                                </h4>
+                                <div class="grid grid-cols-3 gap-2 text-[10px]">
+                                    <div class="bg-slate-900/50 p-2 rounded border border-slate-800 text-center">
+                                        <div class="text-slate-500 mb-1">IoT Fleet Avg</div>
+                                        <div id="resIoT" class="text-white font-mono font-bold">--</div>
                                     </div>
-                                    <div class="flex justify-between px-1"><span
-                                            class="text-purple-400 font-bold">BREAKAGE SCORE</span><span
-                                            id="resBreakage" class="text-purple-300 font-bold font-mono">--</span></div>
+                                    <div class="bg-slate-900/50 p-2 rounded border border-slate-800 text-center">
+                                        <div class="text-slate-500 mb-1">Port Wait</div>
+                                        <div id="resPort" class="text-white font-mono font-bold">--</div>
+                                    </div>
+                                    <div class="bg-slate-900/50 p-2 rounded border border-slate-800 text-center">
+                                        <div class="text-slate-500 mb-1">Logistics Stress</div>
+                                        <div id="resBreakage" class="text-purple-300 font-mono font-bold">--</div>
+                                    </div>
+                                </div>
+                                <!-- DATA SOURCE FOOTER -->
+                                <div class="text-[9px] text-slate-600 flex justify-between items-center px-1 pt-1">
+                                    <span><i class="fas fa-server"></i> AWS RDS: <span
+                                            class="text-green-800">Online</span></span>
+                                    <span><i class="fas fa-bolt"></i> Redis: <span
+                                            class="text-green-800">Active</span></span>
                                 </div>
                             </div>
 
                             <!-- Bottom: Intraday Chart -->
                             <div id="hourlyResult"
-                                class="hidden flex-1 flex flex-col mt-2 pt-2 border-t border-slate-700 min-h-[200px]">
-                                <h4 class="text-[9px] font-bold text-slate-500 uppercase mb-2">High-Frequency Forecast
-                                    (5-MIN)</h4>
-                                <div class="flex-1 relative w-full">
+                                class="hidden flex-1 flex flex-col mt-2 pt-2 border-t border-slate-700 min-h-[220px]">
+                                <h4 class="text-[9px] font-bold text-slate-500 uppercase mb-2">Algorithm Confidence Band
+                                    (Intraday)</h4>
+                                <div class="flex-1 relative w-full h-full">
                                     <canvas id="hourlyChart"></canvas>
                                 </div>
                             </div>
@@ -569,52 +585,87 @@
 
                 document.getElementById('resMove').innerText = "ACTUAL MOVE: " + data.actual_move;
 
-                document.getElementById('resTraffic').innerText = data.satellite_data.traffic_stress_index + " (Idx)";
+                document.getElementById('resIoT').innerText = data.satellite_data.iot_telematics_speed_avg + " mph";
+                document.getElementById('resPort').innerText = data.satellite_data.port_congestion_index + " days";
                 document.getElementById('resBreakage').innerText = data.satellite_data.logistics_disruption_score + "/100";
 
-                const badge = document.getElementById('resVerdict');
-                if (data.correct_direction) { badge.innerText = "CORRECT"; badge.className = "px-2 py-1 bg-green-500 text-black font-bold text-[10px] rounded uppercase"; }
-                else { badge.innerText = "INCORRECT"; badge.className = "px-2 py-1 bg-red-500 text-black font-bold text-[10px] rounded uppercase"; }
+                // Keep the traffic index for reference if needed, or remove
+                // document.getElementById('resTraffic').innerText = ... 
 
-                // HOURLY CHART RENDERING
+                const badge = document.getElementById('resVerdict');
+                if (data.correct_direction) { badge.innerText = "CORRECT"; badge.className = "px-2 py-1 bg-green-500 text-black font-bold text-[10px] rounded uppercase shadow-lg shadow-green-500/20"; }
+                else { badge.innerText = "INCORRECT"; badge.className = "px-2 py-1 bg-red-500 text-black font-bold text-[10px] rounded uppercase shadow-lg shadow-red-500/20"; }
+
+                // HOURLY CHART RENDERING w/ CONFIDENCE BANDS
                 if (data.hourly_forecast) {
                     if (hourlyChart) hourlyChart.destroy();
-                    // Map 'time' (High Frequency)
-                    const h_labels = data.hourly_forecast.map(x => x.time);
-                    const h_prices = data.hourly_forecast.map(x => x.price);
+
+                    const labels = data.hourly_forecast.map(x => x.time);
+                    const predicted = data.hourly_forecast.map(x => x.predicted);
+                    const upper = data.hourly_forecast.map(x => x.conf_upper);
+                    const lower = data.hourly_forecast.map(x => x.conf_lower);
+
+                    // Filter nulls for actuals (if future, no actuals)
+                    const actuals = data.hourly_forecast.map(x => x.actual);
 
                     hourlyChart = new Chart(document.getElementById('hourlyChart'), {
                         type: 'line',
                         data: {
-                            labels: h_labels,
-                            datasets: [{
-                                label: 'Intraday',
-                                data: h_prices,
-                                borderColor: '#22d3ee',
-                                borderWidth: 1.5,
-                                pointRadius: 0, // Smooth line, no dots
-                                pointHoverRadius: 4,
-                                fill: true,
-                                backgroundColor: 'rgba(34, 211, 238, 0.05)',
-                                tension: 0.1
-                            }]
+                            labels: labels,
+                            datasets: [
+                                {
+                                    label: 'Actual Price',
+                                    data: actuals,
+                                    borderColor: '#fbbf24', // Yellow
+                                    borderWidth: 2,
+                                    borderDash: [5, 5],
+                                    pointRadius: 0,
+                                    tension: 0
+                                },
+                                {
+                                    label: 'AI Predicted',
+                                    data: predicted,
+                                    borderColor: '#22d3ee', // Cyan
+                                    borderWidth: 2,
+                                    pointRadius: 0,
+                                    tension: 0.1,
+                                    zIndex: 10
+                                },
+                                {
+                                    label: 'Confidence Upper',
+                                    data: upper,
+                                    borderColor: 'transparent',
+                                    backgroundColor: 'rgba(34, 211, 238, 0.1)',
+                                    fill: '+1', // Fill to next dataset (Lower)
+                                    pointRadius: 0,
+                                    tension: 0.1
+                                },
+                                {
+                                    label: 'Confidence Lower',
+                                    data: lower,
+                                    borderColor: 'transparent',
+                                    backgroundColor: 'transparent', // Only fill the upper one
+                                    fill: false,
+                                    pointRadius: 0,
+                                    tension: 0.1
+                                }
+                            ]
                         },
                         options: {
                             maintainAspectRatio: false,
                             responsive: true,
                             interaction: { mode: 'index', intersect: false },
                             plugins: {
-                                legend: { display: false },
+                                legend: { display: true, labels: { color: '#94a3b8', font: { size: 9 }, boxWidth: 10 } },
                                 tooltip: {
                                     mode: 'index', intersect: false,
-                                    callbacks: { label: (c) => '$' + c.raw }
+                                    callbacks: { label: (c) => c.dataset.label + ': $' + c.raw }
                                 }
                             },
                             scales: {
-                                x: { display: false }, // Hide dense X labels
+                                x: { display: false },
                                 y: {
-                                    display: true,
-                                    position: 'right',
+                                    display: true, position: 'right',
                                     grid: { color: '#1e293b' },
                                     ticks: { color: '#64748b', font: { size: 9 } }
                                 }

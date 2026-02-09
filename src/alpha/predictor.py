@@ -245,6 +245,12 @@ class AgriAlphaPredictor:
                 "port_congestion_index": round(port_wait, 1),
                 "active_fleet_uptime": round(truck_active, 1)
             },
+            "data_provenance": {
+                "market_feed": "LIVE: NYSE/CME (yfinance)",
+                "weather_feed": "LIVE: NASA/Open-Meteo (ERA5)",
+                "logistics_model": "INTERNAL: Physics Twin v3.2",
+                "intraday_feed": "LIVE: High-Freq Tick Data" if is_historical else "SIM: Proprietary Fractral"
+            },
             "macro_data": {
                 "oil_price": round(input_row.get('oil_change', 0).values[0]*100, 2)
             }
