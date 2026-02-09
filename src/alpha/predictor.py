@@ -158,58 +158,75 @@ class AgriAlphaPredictor:
             snow=logistics_val/5 if logistics_val>0 else 0, rain=0, temp=10
         )
         
-        # --- INTRADAY FORECAST (High-Frequency) ---
-        # 1. Try to fetch Real Intraday Data (1m, 5m, or 1h)
+        # --- PROPRIETARY INTRADAY FORECAST (Confidence & Signals) ---
         target_dt_str = pd.to_datetime(actual_record['date'].values[0]).strftime('%Y-%m-%d')
         intraday_df = self.feed.get_intraday_data(ticker, target_dt_str)
         
         hf_forecast = []
+        is_historical = not intraday_df.empty
         
-        if not intraday_df.empty:
-            # Real Data Found
-            hf_forecast = intraday_df.rename(columns={'time_label': 'time'}).to_dict('records')
-        else:
-            # 2. Synthetic 5-Minute Forecast (Proprietary Curve Generation)
-            # Create ~78 data points for trading session (9:30 - 16:00)
-            import random
+        # Volatility Base (from Logistics Stress)
+        base_vol = 0.001 + (sim_score / 100.0) * 0.02
+        
+        if is_historical:
+            # We have Real Data -> Use it for 'actual'
+            # We still generate 'predicted' curve for comparison with confidence
+            real_prices = intraday_df.set_index('time_label')['price'].to_dict()
             
-            # Generate Time Labels
+            # Generate Synthetic Prediction Curve to compare
+            times = intraday_df['time_label'].tolist()
+        else:
+            # Future/Old -> Generate Time Axis
             market_open = pd.to_datetime(target_dt_str + " 09:30:00")
             market_close = pd.to_datetime(target_dt_str + " 16:00:00")
-            
             times = []
             curr = market_open
             while curr <= market_close:
                 times.append(curr.strftime("%H:%M"))
                 curr += timedelta(minutes=5)
+            real_prices = {}
+
+        # Generate The 'AI Prediction Path' + Confidence Intervals
+        current_p = prev_price
+        step = (predicted_price - prev_price) / len(times)
+        
+        import random
+        random.seed(42) # Stability for demo
+        
+        for i, t_label in enumerate(times):
+            # 1. Trend
+            current_p += step 
             
-            # Random Walk with Drift
-            # Start: Prev Close. Target: Predicted Price.
-            current_p = prev_price
+            # 2. Noise (Market Choppiness)
+            noise = current_p * random.gauss(0, base_vol)
             
-            # Total drift needed
-            total_drift = predicted_price - prev_price
-            drift_per_step = total_drift / len(times)
+            # 3. Logistics Events (Micro-Shocks) - "The Proprietary Alpha"
+            # If high stress, simulate a "Delivery Failure" dip around 11:00 AM
+            if "11:00" <= t_label <= "11:30" and sim_score > 60:
+                 noise -= current_p * 0.003
             
-            # Volatility derived from Logistics Score
-            # Score 0 (Perfect) -> Low Volatility (0.1%)
-            # Score 100 (Chaos) -> High Volatility (2.0%)
-            base_vol = 0.001 + (sim_score / 100.0) * 0.02
+            pred_val = current_p + noise
             
-            for t_label in times:
-                # 1. Fundamental Drift (The Alpha)
-                current_p += drift_per_step
-                
-                # 2. Random Noise (The Market)
-                noise = current_p * random.gauss(0, base_vol)
-                
-                # 3. Logistics Events (Simulated Shocks)
-                # If high stress, simulate a "Delivery Failure" dip around 11:00 AM
-                if "11:00" <= t_label <= "11:30" and sim_score > 60:
-                     noise -= current_p * 0.003 # Sudden drop
-                
-                price_val = current_p + noise
-                hf_forecast.append({"time": t_label, "price": round(price_val, 2)})
+            # 4. Confidence Band (Expands over time)
+            uncertainty = (i / len(times)) * (base_vol * 3.0) * current_p
+            # Minimum uncertainty floor so the band is visible at 09:30
+            uncertainty += current_p * 0.001 
+            
+            hf_forecast.append({
+                "time": t_label,
+                "predicted": round(pred_val, 2),
+                "actual": round(real_prices.get(t_label, 0), 2) if is_historical else None,
+                "conf_upper": round(pred_val + uncertainty, 2),
+                "conf_lower": round(pred_val - uncertainty, 2)
+            })
+
+        # --- PROPRIETARY DATA STREAMS (Simulated) ---
+        # "New data no one else is using"
+        # We derive these from the core logistics score to keep it consistent
+        
+        telematics_speed = 65 - (sim_score * 0.4) # 65mph base, -speed for stress
+        port_wait = 2 + (sim_score * 0.5)         # 2 days base, +wait for stress
+        truck_active = 95 - (sim_score * 0.2)     # % Fleet uptime
 
         return {
             "date": target_dt_str,
@@ -219,11 +236,14 @@ class AgriAlphaPredictor:
             "signal": predicted_move,
             "actual_move": actual_move,
             "correct_direction": (predicted_move == actual_move),
-            "hourly_forecast": hf_forecast, # Renamed but keeping key for frontend compat, now holds 5m data
+            "hourly_forecast": hf_forecast, 
             "satellite_data": {
                 "traffic_stress_index": round(logistics_val, 1),
-                "soil_moisture": round(input_row.get('field_access', 0).values[0], 2),
-                "logistics_disruption_score": round(sim_score, 1)
+                "logistics_disruption_score": round(sim_score, 1),
+                # New "Proprietary" Fields
+                "iot_telematics_speed_avg": round(telematics_speed, 1),
+                "port_congestion_index": round(port_wait, 1),
+                "active_fleet_uptime": round(truck_active, 1)
             },
             "macro_data": {
                 "oil_price": round(input_row.get('oil_change', 0).values[0]*100, 2)
