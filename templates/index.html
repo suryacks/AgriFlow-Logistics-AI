@@ -605,6 +605,11 @@
                 document.getElementById('resPort').innerText = data.satellite_data.port_congestion_index + " days";
                 document.getElementById('resBreakage').innerText = data.satellite_data.logistics_disruption_score + "/100";
 
+                if (data.data_provenance) {
+                    document.getElementById('srcMarket').innerText = data.data_provenance.market_feed;
+                    document.getElementById('srcWeather').innerText = data.data_provenance.weather_feed;
+                }
+
                 // Keep the traffic index for reference if needed, or remove
                 // document.getElementById('resTraffic').innerText = ... 
 
