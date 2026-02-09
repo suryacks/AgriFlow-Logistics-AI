@@ -418,19 +418,31 @@
                 </div>
 
                 <!-- Right Column: Charts -->
-                <div class="col-span-12 lg:col-span-8 grid grid-rows-2 gap-4 h-[800px] lg:h-auto">
-                    <!-- Equity Curve -->
-                    <div class="glass-dark p-4 relative flex flex-col">
-                        <h4 class="text-[10px] font-bold text-cyan-400 uppercase mb-2"><i
-                                class="fas fa-chart-line mr-2"></i>Algorithm Equity Curve</h4>
+                <div id="chartsColumn" class="col-span-12 lg:col-span-8 flex flex-col space-y-4">
+                    <!-- Top Chart: Returns / Equity -->
+                    <div id="cardEquity"
+                        class="glass-dark p-4 relative flex flex-col h-[400px] transition-all duration-500 ease-in-out z-30">
+                        <div class="flex justify-between items-center mb-2">
+                            <h4 class="text-[10px] font-bold text-cyan-400 uppercase"><i
+                                    class="fas fa-chart-line mr-2"></i>Algorithm Equity Curve</h4>
+                            <button onclick="toggleChartFullscreen('cardEquity', 'equityChart')"
+                                class="text-slate-500 hover:text-white transition-colors"><i
+                                    class="fas fa-expand"></i></button>
+                        </div>
                         <div class="flex-1 relative w-full h-full">
                             <canvas id="equityChart"></canvas>
                         </div>
                     </div>
-                    <!-- Price Action -->
-                    <div class="glass-dark p-4 relative flex flex-col">
-                        <h4 class="text-[10px] font-bold text-yellow-400 uppercase mb-2"><i
-                                class="fas fa-chart-bar mr-2"></i>Price Action: Predicted vs Actual</h4>
+                    <!-- Bottom Chart: Prediction vs Actual -->
+                    <div id="cardPrice"
+                        class="glass-dark p-4 relative flex flex-col h-[400px] transition-all duration-500 ease-in-out z-30">
+                        <div class="flex justify-between items-center mb-2">
+                            <h4 class="text-[10px] font-bold text-yellow-400 uppercase"><i
+                                    class="fas fa-chart-bar mr-2"></i>Price Action: Predicted vs Actual</h4>
+                            <button onclick="toggleChartFullscreen('cardPrice', 'priceChart')"
+                                class="text-slate-500 hover:text-white transition-colors"><i
+                                    class="fas fa-expand"></i></button>
+                        </div>
                         <div class="flex-1 relative w-full h-full">
                             <canvas id="priceChart"></canvas>
                         </div>
@@ -683,17 +695,44 @@
 
             if (isFullscreen) {
                 // Expand
-                card.classList.remove('h-[600px]', 'relative'); // Remove height constraint
+                card.classList.remove('h-[640px]', 'relative');
                 card.classList.add('fixed', 'inset-4', 'z-50', 'h-[95vh]');
                 if (icon) { icon.classList.remove('fa-expand'); icon.classList.add('fa-compress'); }
             } else {
                 // Contract
                 card.classList.remove('fixed', 'inset-4', 'z-50', 'h-[95vh]');
-                card.classList.add('h-[600px]', 'relative'); // Restore
+                card.classList.add('h-[640px]', 'relative');
                 if (icon) { icon.classList.remove('fa-compress'); icon.classList.add('fa-expand'); }
             }
             // Trigger Chart Resize
             setTimeout(() => { if (hourlyChart) hourlyChart.resize(); }, 300);
+        }
+
+        let isChartFullscreen = false;
+        function toggleChartFullscreen(cardId, chartId) {
+            const card = document.getElementById(cardId);
+            const icon = card.querySelector('.fa-expand, .fa-compress');
+
+            // Check state via class presence
+            const isFull = card.classList.contains('fixed');
+
+            if (!isFull) {
+                // Expand
+                card.classList.remove('h-[400px]', 'relative');
+                card.classList.add('fixed', 'inset-4', 'z-50', 'h-[95vh]');
+                if (icon) { icon.classList.remove('fa-expand'); icon.classList.add('fa-compress'); }
+            } else {
+                // Contract
+                card.classList.remove('fixed', 'inset-4', 'z-50', 'h-[95vh]');
+                card.classList.add('h-[400px]', 'relative');
+                if (icon) { icon.classList.remove('fa-compress'); icon.classList.add('fa-expand'); }
+            }
+
+            // Resize specific chart
+            setTimeout(() => {
+                const chartInstance = Chart.getChart(chartId); // Modern Chart.js way to get instance
+                if (chartInstance) chartInstance.resize();
+            }, 300);
         }
 
         async function runPrediction() {
