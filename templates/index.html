@@ -177,6 +177,9 @@
             <button onclick="setMode('internals')" id="btnInternals"
                 class="px-4 py-2 text-xs font-bold rounded text-slate-400 hover:text-white transition-all">SYSTEM
                 INTERNALS</button>
+            <button onclick="toggleModal('modalSources')"
+                class="px-4 py-2 text-xs font-bold rounded text-slate-400 hover:text-cyan-400 transition-all border-l border-slate-700 ml-2 pl-4"><i
+                    class="fas fa-database mr-1"></i> DATA SOURCES</button>
         </div>
     </nav>
 
@@ -184,7 +187,8 @@
     <main class="h-full pt-20 pb-6 px-6 grid grid-cols-12 gap-6">
 
         <!-- Sidebar: Configuration -->
-        <div class="glass-dark col-span-3 p-6 flex flex-col h-full">
+        <div id="sidebarContainer"
+            class="glass-dark col-span-3 p-6 flex flex-col h-full transition-all duration-300 ease-in-out">
             <h2 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-6">Mission Control</h2>
 
             <!-- LOGISTICS CONTROLS -->
@@ -265,7 +269,8 @@
         </div>
 
         <!-- Main Display Area -->
-        <div class="col-span-9 grid grid-rows-1 h-full gap-6">
+        <div id="mainContentContainer"
+            class="col-span-9 grid grid-rows-1 h-full gap-6 transition-all duration-300 ease-in-out">
 
             <!-- VIEW: LOGISTICS -->
             <div id="viewLogistics" class="h-full flex flex-col space-y-6">
@@ -448,180 +453,233 @@
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
-
-        <!-- VIEW: INTERNALS (Data Pipeline Architecture) -->
-        <div id="viewInternals" class="h-full hidden overflow-y-auto custom-scrollbar p-6 bg-[#0B0F19]">
-
-            <div class="max-w-6xl mx-auto flex flex-col space-y-8">
-
-                <!-- HEADER -->
-                <div class="text-center mb-4">
-                    <h2 class="text-2xl font-bold text-white uppercase tracking-widest"><i
-                            class="fas fa-network-wired text-cyan-400 mr-2"></i>AgriFlow Intelligence Ecosystem</h2>
-                    <p class="text-slate-500 text-xs mt-1">Real-time Data Lineage and Provenance Map</p>
-                </div>
-
-                <!-- PIPELINE DIAGRAM -->
-                <div class="relative grid grid-cols-5 gap-4">
-
-                    <!-- 1. SOURCES (The Raw Input) -->
-                    <div class="col-span-1 flex flex-col space-y-4">
-                        <h3 class="text-[10px] text-slate-500 font-bold uppercase text-center mb-2">1. Raw Data Sources
-                        </h3>
-
-                        <!-- NODE: YFINANCE -->
-                        <div
-                            class="bg-slate-800/50 border border-slate-700 p-3 rounded-lg relative group hover:border-green-500 transition-colors">
-                            <div class="absolute -right-2 top-1/2 w-4 h-[2px] bg-slate-600"></div>
-                            <div class="flex items-center justify-between mb-1">
-                                <span
-                                    class="text-[9px] bg-green-900/50 text-green-400 px-1 rounded border border-green-800">LIVE
-                                    API</span>
-                                <i class="fas fa-chart-line text-slate-400"></i>
-                            </div>
-                            <div class="text-xs font-bold text-white">Market Feed</div>
-                            <div class="text-[9px] text-slate-500">NYSE/CME (YFinance)</div>
-                            <div class="mt-2 text-[8px] text-slate-400 font-mono">
-                                Ingest: OHLCV + Macro<br>
-                                Latency: ~1000ms
-                            </div>
-                        </div>
-
-                        <!-- NODE: OPEN METEO -->
-                        <div
-                            class="bg-slate-800/50 border border-slate-700 p-3 rounded-lg relative group hover:border-cyan-500 transition-colors">
-                            <div class="absolute -right-2 top-1/2 w-4 h-[2px] bg-slate-600"></div>
-                            <div class="flex items-center justify-between mb-1">
-                                <span
-                                    class="text-[9px] bg-green-900/50 text-green-400 px-1 rounded border border-green-800">LIVE
-                                    API</span>
-                                <i class="fas fa-satellite text-slate-400"></i>
-                            </div>
-                            <div class="text-xs font-bold text-white">NASA / ERA5</div>
-                            <div class="text-[9px] text-slate-500">Open-Meteo</div>
-                            <div class="mt-2 text-[8px] text-slate-400 font-mono">
-                                Ingest: Soil/Precip/Wind<br>
-                                Coverage: Global
-                            </div>
-                        </div>
-
-                        <!-- NODE: REDDIT / SOCIAL -->
-                        <div
-                            class="bg-slate-800/50 border border-slate-700 p-3 rounded-lg relative group hover:border-purple-500 transition-colors">
-                            <div class="absolute -right-2 top-1/2 w-4 h-[2px] bg-slate-600"></div>
-                            <div class="flex items-center justify-between mb-1">
-                                <span
-                                    class="text-[9px] bg-blue-900/50 text-blue-400 px-1 rounded border border-blue-800">SCRAPER</span>
-                                <i class="fas fa-comments text-slate-400"></i>
-                            </div>
-                            <div class="text-xs font-bold text-white">Facility Watch</div>
-                            <div class="text-[9px] text-slate-500">r/Truckers (Praw)</div>
-                            <div class="mt-2 text-[8px] text-slate-400 font-mono">
-                                Ingest: Sentiment<br>
-                                Targets: JBS, Tyson
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- ARROW CONNECTOR -->
-                    <div class="col-span-1 flex flex-col justify-center items-center relative">
-                        <div class="h-full w-[2px] bg-slate-800 absolute top-0 bottom-0 left-1/2"></div>
-                        <div class="z-10 bg-[#0B0F19] p-2">
-                            <i class="fas fa-angle-right text-slate-600 text-2xl"></i>
-                        </div>
-                    </div>
-
-                    <!-- 2. SIMULATION LAYER (The Invisible Friction) -->
-                    <div class="col-span-1 flex flex-col justify-center space-y-4">
-                        <h3 class="text-[10px] text-slate-500 font-bold uppercase text-center mb-2">2. Physics Twin</h3>
-
-                        <!-- NODE: HOS SIMULATOR -->
-                        <div
-                            class="bg-slate-900 border border-purple-500/30 p-4 rounded-lg shadow-lg shadow-purple-900/20 relative">
-                            <div class="absolute -left-2 top-1/2 w-4 h-[2px] bg-slate-600"></div>
-                            <div class="absolute -right-2 top-1/2 w-4 h-[2px] bg-slate-600"></div>
-                            <div class="text-center">
-                                <i class="fas fa-truck-moving text-purple-400 text-xl mb-2"></i>
-                                <div class="text-sm font-bold text-white">HOS Domino Engine</div>
-                                <div class="text-[9px] text-slate-400 mt-1">SimPy Discrete Event</div>
-                            </div>
-                            <div class="mt-3 bg-black/40 p-2 rounded text-[9px] font-mono text-slate-300">
-                                <span class="text-red-400">INPUT:</span> Traffic Delay<br>
-                                <span class="text-green-400">LOGIC:</span> If 11h Violated -> +10h Rest<br>
-                                <span class="text-cyan-400">OUTPUT:</span> Fleet Failure Rate %
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- ARROW CONNECTOR -->
-                    <div class="col-span-1 flex flex-col justify-center items-center relative">
-                        <div class="h-full w-[2px] bg-slate-800 absolute top-0 bottom-0 left-1/2"></div>
-                        <div class="z-10 bg-[#0B0F19] p-2">
-                            <i class="fas fa-angle-right text-slate-600 text-2xl"></i>
-                        </div>
-                    </div>
-
-                    <!-- 3. ALPHA GENERATION (The Output) -->
-                    <div class="col-span-1 flex flex-col justify-center space-y-4">
-                        <h3 class="text-[10px] text-slate-500 font-bold uppercase text-center mb-2">3. Alpha Signal</h3>
-
-                        <!-- NODE: PREDICTOR -->
-                        <div
-                            class="bg-gradient-to-b from-slate-800 to-slate-900 border border-cyan-500/50 p-4 rounded-lg shadow-xl shadow-cyan-900/20 relative">
-                            <div class="absolute -left-2 top-1/2 w-4 h-[2px] bg-slate-600"></div>
-                            <div class="text-center">
-                                <i class="fas fa-brain text-cyan-400 text-2xl mb-2 animate-pulse-slow"></i>
-                                <div class="text-sm font-bold text-white">Gradient Boosting</div>
-                                <div class="text-[9px] text-slate-400 mt-1">XGBoost Regressor</div>
-                            </div>
-                            <div class="mt-3 border-t border-slate-700 pt-2 space-y-1">
-                                <div class="flex justify-between text-[9px] text-slate-300">
-                                    <span>Market Weight:</span> <span class="text-white font-bold">40%</span>
-                                </div>
-                                <div class="flex justify-between text-[9px] text-slate-300">
-                                    <span>Weather Weight:</span> <span class="text-white font-bold">35%</span>
-                                </div>
-                                <div class="flex justify-between text-[9px] text-slate-300">
-                                    <span>Logistics Weight:</span> <span class="text-purple-400 font-bold">25%</span>
-                                </div>
-                            </div>
-                            <div class="mt-3 text-center">
-                                <span class="bg-cyan-500 text-black text-[10px] font-bold px-3 py-1 rounded">BUY /
-                                    SELL</span>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-
-                <!-- Footer Stats -->
-                <div class="grid grid-cols-4 gap-4 mt-8 pt-8 border-t border-slate-800">
-                    <div class="text-center">
-                        <div class="text-2xl font-bold text-white">2.4M+</div>
-                        <div class="text-[9px] text-slate-500 uppercase">Data Points Ingested</div>
-                    </div>
-                    <div class="text-center">
-                        <div class="text-2xl font-bold text-white">180ms</div>
-                        <div class="text-[9px] text-slate-500 uppercase">E2E Latency</div>
-                    </div>
-                    <div class="text-center">
-                        <div class="text-2xl font-bold text-white">548</div>
-                        <div class="text-[9px] text-slate-500 uppercase">Logistics Nodes</div>
-                    </div>
-                    <div class="text-center">
-                        <div class="text-2xl font-bold text-green-400">98.2%</div>
-                        <div class="text-[9px] text-slate-500 uppercase">Uptime</div>
-                    </div>
-                </div>
 
             </div>
-        </div>
+            <!-- VIEW: INTERNALS (Data Pipeline Architecture) -->
+            <div id="viewInternals" class="h-full hidden bg-[#0B0F19] p-6 relative">
+                <!-- BACKGROUND & DECORATION -->
+                <div class="absolute inset-0 z-0 opacity-10 pointer-events-none"
+                    style="background-image: radial-gradient(#334155 1px, transparent 1px); background-size: 20px 20px;">
+                </div>
+
+                <div class="relative z-10 h-full flex flex-col">
+                    <!-- Header -->
+                    <div class="mb-4 flex justify-between items-center px-4">
+                        <div>
+                            <h2 class="text-xl font-bold text-white uppercase tracking-widest"><i
+                                    class="fas fa-network-wired text-cyan-400 mr-2"></i>AgriFlow Intelligence</h2>
+                            <p class="text-slate-500 text-[10px] mt-1">Live Data Lineage Map</p>
+                        </div>
+                        <div class="flex space-x-4 text-[9px] text-slate-400 uppercase">
+                            <div class="flex items-center"><span
+                                    class="w-2 h-2 rounded-full bg-green-500 mr-1 animate-pulse"></span> Ingest Active
+                            </div>
+                            <div class="flex items-center"><span class="w-2 h-2 rounded-full bg-purple-500 mr-1"></span>
+                                Simulation Running</div>
+                        </div>
+                    </div>
+
+                    <!-- PIPELINE FLEX CONTAINER (Fit-to-Screen) -->
+                    <div class="flex-1 flex flex-row items-center justify-between gap-4 px-4 overflow-hidden">
+
+                        <!-- 1. SOURCE CLUSTER -->
+                        <div class="flex flex-col space-y-4 w-1/4">
+                            <h3 class="text-[10px] text-slate-500 font-bold uppercase text-center mb-2">Data Ingestion
+                            </h3>
+
+                            <!-- Card 1 -->
+                            <div class="glass-dark p-3 border-l-2 border-green-500">
+                                <div class="flex justify-between items-center mb-1">
+                                    <span class="text-[9px] text-green-400 font-bold">MARKET</span>
+                                    <i class="fas fa-chart-line text-slate-500 text-xs"></i>
+                                </div>
+                                <div class="text-xs text-white">NYSE/CME Feed</div>
+                                <div class="text-[8px] text-slate-500 mt-1">Tick-Level • ~50ms</div>
+                            </div>
+
+                            <!-- Card 2 -->
+                            <div class="glass-dark p-3 border-l-2 border-cyan-500">
+                                <div class="flex justify-between items-center mb-1">
+                                    <span class="text-[9px] text-cyan-400 font-bold">WEATHER</span>
+                                    <i class="fas fa-cloud text-slate-500 text-xs"></i>
+                                </div>
+                                <div class="text-xs text-white">NASA / ERA5</div>
+                                <div class="text-[8px] text-slate-500 mt-1">Global Precip • NetCDF</div>
+                            </div>
+
+                            <!-- Card 3 -->
+                            <div class="glass-dark p-3 border-l-2 border-purple-500">
+                                <div class="flex justify-between items-center mb-1">
+                                    <span class="text-[9px] text-purple-400 font-bold">SOCIAL</span>
+                                    <i class="fas fa-hashtag text-slate-500 text-xs"></i>
+                                </div>
+                                <div class="text-xs text-white">Facility Watch</div>
+                                <div class="text-[8px] text-slate-500 mt-1">Reddit PRAW • 15m Poll</div>
+                            </div>
+                        </div>
+
+                        <!-- ARROW 1 -->
+                        <div class="flex flex-col items-center justify-center">
+                            <div class="h-[2px] w-8 bg-slate-700"></div>
+                            <i class="fas fa-chevron-right text-slate-500"></i>
+                        </div>
+
+                        <!-- 2. SIMULATION ENGINE (Centerpiece) -->
+                        <div class="w-1/3 flex flex-col justify-center">
+                            <h3 class="text-[10px] text-slate-500 font-bold uppercase text-center mb-2">Physics Twin
+                            </h3>
+
+                            <div
+                                class="bg-slate-900/80 border border-slate-700 p-6 rounded-xl relative overflow-hidden group hover:border-purple-500 transition-colors">
+                                <!-- Animated Pulse Background -->
+                                <div
+                                    class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-purple-500/10 rounded-full blur-xl animate-pulse">
+                                </div>
+
+                                <div class="relative z-10 text-center">
+                                    <i class="fas fa-truck-moving text-3xl text-purple-400 mb-3"></i>
+                                    <h4 class="text-lg font-bold text-white">HOS Domino Engine</h4>
+                                    <p class="text-[10px] text-slate-400 font-mono mt-1">Discrete Event Sim (SimPy)</p>
+
+                                    <div class="mt-4 grid grid-cols-2 gap-2">
+                                        <div class="bg-black/40 p-2 rounded">
+                                            <div class="text-[8px] text-slate-500">NODES</div>
+                                            <div class="text-xs text-white font-mono">548</div>
+                                        </div>
+                                        <div class="bg-black/40 p-2 rounded">
+                                            <div class="text-[8px] text-slate-500">ROUTES</div>
+                                            <div class="text-xs text-white font-mono">2,403</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ARROW 2 -->
+                        <div class="flex flex-col items-center justify-center">
+                            <div class="h-[2px] w-8 bg-slate-700"></div>
+                            <i class="fas fa-chevron-right text-slate-500"></i>
+                        </div>
+
+                        <!-- 3. ALPHA GENERATION -->
+                        <div class="w-1/4 flex flex-col justify-center">
+                            <h3 class="text-[10px] text-slate-500 font-bold uppercase text-center mb-2">Alpha Signal
+                            </h3>
+
+                            <div
+                                class="bg-gradient-to-br from-slate-900 to-black border border-cyan-500/50 p-6 rounded-xl text-center shadow-[0_0_20px_rgba(6,182,212,0.1)]">
+                                <i class="fas fa-brain text-2xl text-cyan-400 mb-3"></i>
+                                <div class="text-sm font-bold text-white uppercase tracking-wider">Prediction</div>
+                                <div class="text-[10px] text-slate-500">XGBoost Regressor</div>
+
+                                <div class="mt-4 pt-4 border-t border-slate-800 space-y-1">
+                                    <div class="flex justify-between text-[10px]"><span
+                                            class="text-slate-500">Confidence</span> <span
+                                            class="text-green-400">94.2%</span></div>
+                                    <div class="flex justify-between text-[10px]"><span
+                                            class="text-slate-500">Horizon</span> <span class="text-white">4h /
+                                            1d</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
 
         </div>
 
     </main>
+
+    <!-- DATA SOURCES MODAL -->
+    <div id="modalSources"
+        class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/80 backdrop-blur-sm transition-opacity"
+        onclick="toggleModal('modalSources')">
+        <div class="glass-dark p-8 rounded-2xl max-w-2xl w-full relative transform transition-transform scale-100"
+            onclick="event.stopPropagation()">
+            <button onclick="toggleModal('modalSources')"
+                class="absolute top-4 right-4 text-slate-500 hover:text-white"><i
+                    class="fas fa-times text-xl"></i></button>
+
+            <h2 class="text-2xl font-bold text-white mb-2 uppercase tracking-widest"><i
+                    class="fas fa-database text-cyan-400 mr-3"></i>Data Intelligence Sources</h2>
+            <p class="text-sm text-slate-400 mb-8 border-b border-slate-700 pb-4">Real-time feeds powering the AgriFlow
+                Alpha engine.</p>
+
+            <div class="grid grid-cols-2 gap-6">
+                <!-- Market -->
+                <div class="bg-slate-800/50 p-4 rounded-xl border border-slate-700">
+                    <div class="flex items-center mb-2">
+                        <i class="fas fa-chart-line text-green-400 text-lg mr-2"></i>
+                        <h3 class="text-sm font-bold text-white uppercase">Market Data</h3>
+                    </div>
+                    <div class="text-xs text-slate-400 space-y-1">
+                        <div class="flex justify-between"><span>Provider:</span> <span class="text-white">Yahoo Finance
+                                (yfinance)</span></div>
+                        <div class="flex justify-between"><span>Latency:</span> <span class="text-white">~150ms
+                                (Tick)</span></div>
+                        <div class="flex justify-between"><span>Coverage:</span> <span class="text-white">NYSE, CME,
+                                CBOT</span></div>
+                    </div>
+                </div>
+
+                <!-- Weather -->
+                <div class="bg-slate-800/50 p-4 rounded-xl border border-slate-700">
+                    <div class="flex items-center mb-2">
+                        <i class="fas fa-cloud text-cyan-400 text-lg mr-2"></i>
+                        <h3 class="text-sm font-bold text-white uppercase">Environmental</h3>
+                    </div>
+                    <div class="text-xs text-slate-400 space-y-1">
+                        <div class="flex justify-between"><span>Source:</span> <span class="text-white">NASA POWER /
+                                ERA5</span></div>
+                        <div class="flex justify-between"><span>API:</span> <span class="text-white">Open-Meteo
+                                Archive</span></div>
+                        <div class="flex justify-between"><span>Params:</span> <span class="text-white">Precip, Soil
+                                Moist, VPD</span></div>
+                    </div>
+                </div>
+
+                <!-- Logistics (Proprietary) -->
+                <div class="bg-slate-800/50 p-4 rounded-xl border border-purple-500/50 relative overflow-hidden">
+                    <div class="absolute inset-0 bg-purple-500/5 animate-pulse pointer-events-none"></div>
+                    <div class="flex items-center mb-2 relative z-10">
+                        <i class="fas fa-truck-moving text-purple-400 text-lg mr-2"></i>
+                        <h3 class="text-sm font-bold text-white uppercase">Logistics Twin</h3>
+                    </div>
+                    <div class="text-xs text-slate-400 space-y-1 relative z-10">
+                        <div class="flex justify-between"><span>Engine:</span> <span
+                                class="text-white font-bold">AgriFlow Sim v3.2</span></div>
+                        <div class="flex justify-between"><span>Logic:</span> <span class="text-white">SimPy Discrete
+                                Event</span></div>
+                        <div class="flex justify-between"><span>Signals:</span> <span class="text-white">Route HOS,
+                                Traffic Stress</span></div>
+                    </div>
+                </div>
+
+                <!-- Social (Proprietary) -->
+                <div class="bg-slate-800/50 p-4 rounded-xl border border-blue-500/50 relative">
+                    <div class="flex items-center mb-2">
+                        <i class="fas fa-hashtag text-blue-400 text-lg mr-2"></i>
+                        <h3 class="text-sm font-bold text-white uppercase">Social Sentiment</h3>
+                    </div>
+                    <div class="text-xs text-slate-400 space-y-1">
+                        <div class="flex justify-between"><span>Source:</span> <span class="text-white">Reddit
+                                (r/Truckers)</span></div>
+                        <div class="flex justify-between"><span>Method:</span> <span class="text-white">NLP / Volatility
+                                Proxy</span></div>
+                        <div class="flex justify-between"><span>Update:</span> <span class="text-white">Live
+                                Stream</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-8 text-center">
+                <p class="text-[10px] text-slate-500 uppercase tracking-widest">AgriFlow Intelligence Ecosystem v0.0.1
+                </p>
+            </div>
+        </div>
+    </div>
 
     <script>
         // GLOBALS
@@ -629,15 +687,50 @@
 
         // --- NAVIGATION ---
         function setMode(mode) {
-            ['Logistics', 'Alpha', 'Internals'].forEach(m => {
-                document.getElementById('view' + m).classList.add('hidden');
-                document.getElementById('ctrl' + (m === 'Internals' ? 'Internal' : m)).classList.add('hidden');
-                document.getElementById('btn' + m).className = "px-4 py-2 text-xs font-bold rounded text-slate-400 hover:text-white transition-all";
-            });
-            document.getElementById('view' + (mode.charAt(0).toUpperCase() + mode.slice(1))).classList.remove('hidden');
-            const ctrl = document.getElementById('ctrl' + (mode === 'internals' ? 'Internal' : (mode.charAt(0).toUpperCase() + mode.slice(1))));
-            if (ctrl) ctrl.classList.remove('hidden');
+            // Reset Buttons
+            ['Logistics', 'Alpha', 'Internals'].forEach(m => document.getElementById('btn' + m).className = "px-4 py-2 text-xs font-bold rounded text-slate-400 hover:text-white transition-all");
             document.getElementById('btn' + (mode.charAt(0).toUpperCase() + mode.slice(1))).className = "px-4 py-2 text-xs font-bold rounded bg-slate-700 text-white shadow";
+
+            // Hide All Views first
+            document.getElementById('viewLogistics').classList.add('hidden');
+            document.getElementById('viewAlpha').classList.add('hidden');
+            document.getElementById('viewInternals').classList.add('hidden');
+
+            // Hide All Controls
+            document.getElementById('ctrlLogistics').classList.add('hidden');
+            document.getElementById('ctrlAlpha').classList.add('hidden');
+            document.getElementById('ctrlInternal').classList.add('hidden');
+
+            // Layout Elements
+            const sidebar = document.getElementById('sidebarContainer');
+            const mainContent = document.getElementById('mainContentContainer');
+
+            if (mode === 'internals') {
+                // HIDE SIDEBAR -> FULL WIDTH
+                sidebar.classList.add('hidden');
+                sidebar.classList.remove('col-span-3', 'flex');
+
+                mainContent.classList.remove('col-span-9');
+                mainContent.classList.add('col-span-12');
+
+                document.getElementById('viewInternals').classList.remove('hidden');
+
+            } else {
+                // SHOW SIDEBAR -> SPLIT VIEW
+                sidebar.classList.remove('hidden');
+                sidebar.classList.add('col-span-3', 'flex');
+
+                mainContent.classList.remove('col-span-12');
+                mainContent.classList.add('col-span-9');
+
+                // Show Specific View & Control
+                const viewId = 'view' + (mode.charAt(0).toUpperCase() + mode.slice(1));
+                document.getElementById(viewId).classList.remove('hidden');
+
+                const ctrlId = 'ctrl' + (mode === 'logistics' ? 'Logistics' : 'Alpha');
+                const ctrl = document.getElementById(ctrlId);
+                if (ctrl) ctrl.classList.remove('hidden');
+            }
         }
 
         // --- SLIDERS ---
@@ -687,6 +780,15 @@
         }
 
         // --- UI UTILS ---
+        function toggleModal(id) {
+            const el = document.getElementById(id);
+            if (el.classList.contains('hidden')) {
+                el.classList.remove('hidden');
+            } else {
+                el.classList.add('hidden');
+            }
+        }
+
         let isFullscreen = false;
         function toggleFullscreen() {
             const card = document.getElementById('cardSingleEvent');
