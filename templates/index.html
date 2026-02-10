@@ -299,7 +299,7 @@
             <!-- VIEW: ALPHA (Split Views) -->
             <div id="viewAlpha" class="hidden grid grid-cols-12 gap-8 p-6">
                 <!-- Left Column: Prediction & Controls -->
-                <div class="col-span-12 lg:col-span-4 flex flex-col space-y-4">
+                <div class="col-span-12 xl:col-span-3 flex flex-col space-y-4">
 
                     <!-- Single Event Card (Expandable) -->
                     <div id="cardSingleEvent"
@@ -444,7 +444,7 @@
 
 
         <!-- Right Column: Charts -->
-        <div id="chartsColumn" class="col-span-12 lg:col-span-8 flex flex-col space-y-4">
+        <div id="chartsColumn" class="col-span-12 xl:col-span-9 flex flex-col space-y-4">
             <!-- Top Chart: Returns / Equity -->
             <div id="cardEquity"
                 class="glass-dark p-4 relative flex flex-col h-[400px] transition-all duration-500 ease-in-out z-30">
@@ -490,7 +490,7 @@
 
             <div class="flex-1 flex gap-6 h-[500px]">
                 <!-- CONTROLS -->
-                <div class="w-1/4 glass-dark p-6 flex flex-col space-y-6">
+                <div class=" glass-dark p-6 flex flex-col space-y-6">
                     <p class="text-xs text-slate-400 leading-relaxed">
                         Interact with the <strong>Reinforcement Learning (RL)</strong> Agent.
                         Click on the grid to place <span class="text-red-400 font-bold">Obstacles</span>.
@@ -558,10 +558,10 @@
                 </div>
 
                 <!-- PIPELINE FLEX CONTAINER (Fit-to-Screen) -->
-                <div class="flex-1 flex flex-row items-stretch justify-between gap-4 px-4 overflow-y-auto">
+                <div class="flex-1 grid grid-cols-1 md:grid-cols-4 gap-8 px-4 overflow-y-auto w-full">
 
                     <!-- 1. SOURCE CLUSTER -->
-                    <div class="flex flex-col space-y-4 w-1/4">
+                    <div class="flex flex-col space-y-4">
                         <h3 class="text-[10px] text-slate-500 font-bold uppercase text-center mb-2">Data Ingestion
                         </h3>
 
@@ -622,7 +622,7 @@
                     </div>
 
                     <!-- 2. SIMULATION ENGINE (Centerpiece) -->
-                    <div class="w-1/3 flex flex-col justify-center">
+                    <div class=" flex flex-col justify-center">
                         <h3 class="text-[10px] text-slate-500 font-bold uppercase text-center mb-2">Physics Twin
                         </h3>
 
@@ -666,7 +666,7 @@
                 </div>
 
                 <!-- 3. ALPHA GENERATION -->
-                <div class="w-1/4 flex flex-col justify-center">
+                <div class=" flex flex-col justify-center">
                     <h3 class="text-[10px] text-slate-500 font-bold uppercase text-center mb-2">Alpha Signal
                     </h3>
 

@@ -231,7 +231,7 @@ class AgriAlphaPredictor:
         
         import random
         # Seed with the date string to ensure different results per day
-        random.seed(target_dt_str) 
+        random.seed(target_date_str) 
         
         for i, t_label in enumerate(times):
             # 1. Trend
@@ -247,7 +247,7 @@ class AgriAlphaPredictor:
             
             # Day of Week Seasonality
             # Monday (0) = Volatility, Friday (4) = Profit Taking Dip
-            dow = target_dt.weekday()
+            dow = target_date.weekday()
             if dow == 0: # Monday Volatility
                 noise *= 1.2
             elif dow == 4 and "14:00" <= t_label: # Friday Afternoon Dip
