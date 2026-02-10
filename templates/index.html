@@ -1240,10 +1240,31 @@
 
                 document.getElementById('backtestStats').classList.remove('opacity-50');
                 document.getElementById('btAcc').innerText = data.accuracy + "%";
-                let capVal = parseFloat(capital);
-                let profit = data.final_capital - capVal;
+                // Reuse profit from above block
                 document.getElementById('btRoi').innerText = (profit >= 0 ? "+" : "") + "$" + Math.round(profit).toLocaleString() + " (" + data.roi + "%)";
                 document.getElementById('btRoi').className = profit >= 0 ? "text-xs font-bold text-green-400 font-mono" : "text-xs font-bold text-red-400 font-mono";
+
+                // POPULATE TRADE LOG (New)
+                const logBody = document.getElementById('tradeLogBody');
+                document.getElementById('cardTradeLog').classList.remove('hidden');
+                logBody.innerHTML = "";
+                if (data.trades && data.trades.length > 0) {
+                    [...data.trades].reverse().forEach(t => {
+                        let row = document.createElement('tr');
+                        row.className = "border-b border-slate-800 hover:bg-slate-800/50 transition-colors";
+                        row.innerHTML = `
+                            <td class="p-2 text-slate-400">${t.date}</td>
+                            <td class="p-2 font-bold ${t.type === 'LONG' ? 'text-green-400' : 'text-red-400'}">${t.type}</td>
+                            <td class="p-2">$${t.price}</td>
+                            <td class="p-2 ${t.pnl >= 0 ? 'text-green-400' : 'text-red-400'}">${t.pnl >= 0 ? '+' : ''}$${t.pnl}</td>
+                            <td class="p-2 ${t.roi >= 0 ? 'text-green-400' : 'text-red-400'}">${t.roi}%</td>
+                        `;
+                        logBody.appendChild(row);
+                    });
+                } else {
+                    logBody.innerHTML = "<tr><td colspan='5' class='p-4 text-center text-slate-500'>No Trades Executed</td></tr>";
+                }
+
                 const labels = data.curve.map(x => x.date);
 
                 // Chart 1: Equity
