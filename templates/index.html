@@ -1297,7 +1297,15 @@
                         labels: labels,
                         datasets: [{
                             label: 'Strategy Equity ($)', data: data.curve.map(x => x.equity),
-                            borderColor: '#22d3ee', backgroundColor: 'rgba(34, 211, 238, 0.1)', fill: true, tension: 0.4
+                            borderColor: '#22d3ee',
+                            backgroundColor: 'rgba(34, 211, 238, 0.1)',
+                            fill: true,
+                            tension: 0.4,
+                            borderWidth: 2,
+                            pointRadius: 0,
+                            pointHoverRadius: 6,
+                            shadowBlur: 15,    // Glow
+                            shadowColor: '#22d3ee' // Glow
                         }]
                     },
                     options: { maintainAspectRatio: false, responsive: true, plugins: { legend: { display: false } }, scales: { x: { display: false }, y: { grid: { color: '#334155' } } } }
