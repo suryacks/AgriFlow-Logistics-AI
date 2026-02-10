@@ -493,6 +493,28 @@
                     <canvas id="priceChart"></canvas>
                 </div>
             </div>
+
+            <!-- Trade Log Table -->
+            <div id="cardTradeLog" class="glass-dark p-4 flex flex-col h-[300px] hidden">
+                <h4 class="text-xs font-bold text-slate-500 uppercase mb-2"><i class="fas fa-list mr-2"></i>Live Trade
+                    Activity Log</h4>
+                <div class="flex-1 overflow-y-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead class="text-xs text-slate-500 uppercase sticky top-0 bg-[#0f172a] z-10">
+                            <tr>
+                                <th class="p-2">Date</th>
+                                <th class="p-2">Type</th>
+                                <th class="p-2">Price</th>
+                                <th class="p-2">P&L</th>
+                                <th class="p-2">ROI</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tradeLogBody" class="text-xs font-mono text-slate-300">
+                            <!-- Rows Injected Here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
         </div>
 
