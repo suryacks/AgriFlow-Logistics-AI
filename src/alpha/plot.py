@@ -3,8 +3,8 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import pandas as pd
 import numpy as np
-from .feed import MarketFeed
-from src.logistics.simulation_engine import SimulationEngine # Bridge
+from src.ingest.feed import MarketFeed
+from src.core.simulation_engine import SimulationEngine # Bridge
 import io
 
 class AlphaPlotter:

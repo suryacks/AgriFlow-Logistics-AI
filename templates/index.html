@@ -180,6 +180,9 @@
             <button onclick="toggleModal('modalSources')"
                 class="px-4 py-2 text-xs font-bold rounded text-slate-400 hover:text-cyan-400 transition-all border-l border-slate-700 ml-2 pl-4"><i
                     class="fas fa-database mr-1"></i> DATA SOURCES</button>
+            <button onclick="setMode('l2l')" id="btnL2L"
+                class="px-4 py-2 text-xs font-bold rounded text-slate-400 hover:text-orange-400 transition-all border-l border-slate-700 ml-2 pl-4"><i
+                    class="fas fa-flask mr-1"></i> L2L LAB</button>
         </div>
     </nav>
 
@@ -352,241 +355,402 @@
                                     </div>
                                 </div>
 
-                                <!-- Proprietary Signals Grid -->
-                                <div class="border-t border-slate-700/50 pt-2 mt-1">
-                                    <h4
-                                        class="text-[9px] text-purple-400 font-bold uppercase mb-2 flex items-center justify-center">
-                                        <i class="fas fa-satellite-dish mr-1"></i> Live Logistics Signals
-                                    </h4>
-                                    <div class="grid grid-cols-3 gap-1">
-                                        <div class="bg-slate-800 p-1.5 rounded text-center">
-                                            <div class="text-[8px] text-slate-500 uppercase">Fleet</div>
-                                            <div id="resIoT" class="text-xs font-mono font-bold text-white">--</div>
-                                        </div>
-                                        <div class="bg-slate-800 p-1.5 rounded text-center">
-                                            <div class="text-[8px] text-slate-500 uppercase">Port</div>
-                                            <div id="resPort" class="text-xs font-mono font-bold text-white">--</div>
-                                        </div>
-                                        <div class="bg-slate-800 p-1.5 rounded text-center">
-                                            <div class="text-[8px] text-slate-500 uppercase">Stress</div>
-                                            <div id="resBreakage" class="text-xs font-mono font-bold text-white">--
-                                            </div>
-                                        </div>
+                                <!-- CAPITAL ALLOCATION -->
+                                <div class="border-t border-slate-700/50 pt-2 mt-2">
+                                    <div class="flex justify-between items-center mb-1">
+                                        <label class="text-[9px] text-slate-400 uppercase font-bold">Capital
+                                            Allocation</label>
+                                        <span id="capitalLabel"
+                                            class="text-[9px] text-cyan-400 font-mono">$10,000</span>
                                     </div>
+                                    <input type="range" id="capitalSlider" min="1000" max="100000" step="1000"
+                                        value="10000"
+                                        class="w-full h-1 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-cyan-500"
+                                        oninput="updateProfitCalc()">
                                 </div>
 
-                                <!-- Data Provenance Footer -->
-                                <div id="provenanceBadge"
-                                    class="flex justify-between items-center px-1 py-1 mt-1 bg-black/40 rounded border border-slate-800 hidden">
-                                    <span class="text-[8px] text-green-500 font-mono"><i
-                                            class="fas fa-check mr-1"></i><span id="srcMarket"
-                                            class="text-slate-400">Verifying...</span></span>
-                                    <span class="text-[8px] text-green-500 font-mono"><i
-                                            class="fas fa-check mr-1"></i><span id="srcWeather"
-                                            class="text-slate-400">Verifying...</span></span>
-                                </div>
-
-                                <!-- Intraday Chart -->
-                                <div id="hourlyResult"
-                                    class="flex-1 min-h-[180px] relative border-t border-slate-700/50 mt-2 pt-2">
-                                    <h5 class="text-[9px] text-slate-500 uppercase absolute top-2 left-0 z-10">High-Freq
-                                        Confidence Band</h5>
-                                    <canvas id="hourlyChart"></canvas>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Backtest Controls -->
-                    <div class="glass-dark p-4 rounded-lg">
-                        <div class="flex justify-between items-center mb-3">
-                            <h4 class="text-[10px] font-bold text-slate-400 uppercase">Quarterly Simulation</h4>
-                            <span class="text-[9px] text-slate-600 bg-slate-900 px-2 py-0.5 rounded">Q1 2024</span>
-                        </div>
-                        <button id="btnBacktest" onclick="runBacktest()"
-                            class="w-full py-3 bg-slate-800 hover:bg-slate-700 border border-slate-600 hover:border-cyan-500 text-white text-xs font-bold rounded transition-all flex items-center justify-center shadow-lg">
-                            <i class="fas fa-play mr-2 text-cyan-400"></i> RUN BACKTEST
-                        </button>
-                        <div id="backtestStats"
-                            class="grid grid-cols-2 gap-4 mt-4 opacity-50 transition-opacity duration-500">
-                            <div class="text-center">
-                                <div class="text-[9px] text-slate-500 uppercase">Win Rate</div>
-                                <div id="btAcc" class="text-lg font-bold text-white">--</div>
-                            </div>
-                            <div class="text-center">
-                                <div class="text-[9px] text-slate-500 uppercase">Total ROI</div>
-                                <div id="btRoi" class="text-lg font-bold text-white">--</div>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-
-                <!-- Right Column: Charts -->
-                <div id="chartsColumn" class="col-span-12 lg:col-span-8 flex flex-col space-y-4">
-                    <!-- Top Chart: Returns / Equity -->
-                    <div id="cardEquity"
-                        class="glass-dark p-4 relative flex flex-col h-[400px] transition-all duration-500 ease-in-out z-30">
-                        <div class="flex justify-between items-center mb-2">
-                            <h4 class="text-[10px] font-bold text-cyan-400 uppercase"><i
-                                    class="fas fa-chart-line mr-2"></i>Algorithm Equity Curve</h4>
-                            <button onclick="toggleChartFullscreen('cardEquity', 'equityChart')"
-                                class="text-slate-500 hover:text-white transition-colors"><i
-                                    class="fas fa-expand"></i></button>
-                        </div>
-                        <div class="flex-1 relative w-full h-full">
-                            <canvas id="equityChart"></canvas>
-                        </div>
-                    </div>
-                    <!-- Bottom Chart: Prediction vs Actual -->
-                    <div id="cardPrice"
-                        class="glass-dark p-4 relative flex flex-col h-[400px] transition-all duration-500 ease-in-out z-30">
-                        <div class="flex justify-between items-center mb-2">
-                            <h4 class="text-[10px] font-bold text-yellow-400 uppercase"><i
-                                    class="fas fa-chart-bar mr-2"></i>Price Action: Predicted vs Actual</h4>
-                            <button onclick="toggleChartFullscreen('cardPrice', 'priceChart')"
-                                class="text-slate-500 hover:text-white transition-colors"><i
-                                    class="fas fa-expand"></i></button>
-                        </div>
-                        <div class="flex-1 relative w-full h-full">
-                            <canvas id="priceChart"></canvas>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-            <!-- VIEW: INTERNALS (Data Pipeline Architecture) -->
-            <div id="viewInternals" class="h-full hidden bg-[#0B0F19] p-6 relative">
-                <!-- BACKGROUND & DECORATION -->
-                <div class="absolute inset-0 z-0 opacity-10 pointer-events-none"
-                    style="background-image: radial-gradient(#334155 1px, transparent 1px); background-size: 20px 20px;">
-                </div>
-
-                <div class="relative z-10 h-full flex flex-col">
-                    <!-- Header -->
-                    <div class="mb-4 flex justify-between items-center px-4">
-                        <div>
-                            <h2 class="text-xl font-bold text-white uppercase tracking-widest"><i
-                                    class="fas fa-network-wired text-cyan-400 mr-2"></i>AgriFlow Intelligence</h2>
-                            <p class="text-slate-500 text-[10px] mt-1">Live Data Lineage Map</p>
-                        </div>
-                        <div class="flex space-x-4 text-[9px] text-slate-400 uppercase">
-                            <div class="flex items-center"><span
-                                    class="w-2 h-2 rounded-full bg-green-500 mr-1 animate-pulse"></span> Ingest Active
-                            </div>
-                            <div class="flex items-center"><span class="w-2 h-2 rounded-full bg-purple-500 mr-1"></span>
-                                Simulation Running</div>
-                        </div>
-                    </div>
-
-                    <!-- PIPELINE FLEX CONTAINER (Fit-to-Screen) -->
-                    <div class="flex-1 flex flex-row items-center justify-between gap-4 px-4 overflow-hidden">
-
-                        <!-- 1. SOURCE CLUSTER -->
-                        <div class="flex flex-col space-y-4 w-1/4">
-                            <h3 class="text-[10px] text-slate-500 font-bold uppercase text-center mb-2">Data Ingestion
-                            </h3>
-
-                            <!-- Card 1 -->
-                            <div class="glass-dark p-3 border-l-2 border-green-500">
-                                <div class="flex justify-between items-center mb-1">
-                                    <span class="text-[9px] text-green-400 font-bold">MARKET</span>
-                                    <i class="fas fa-chart-line text-slate-500 text-xs"></i>
-                                </div>
-                                <div class="text-xs text-white">NYSE/CME Feed</div>
-                                <div class="text-[8px] text-slate-500 mt-1">Tick-Level • ~50ms</div>
-                            </div>
-
-                            <!-- Card 2 -->
-                            <div class="glass-dark p-3 border-l-2 border-cyan-500">
-                                <div class="flex justify-between items-center mb-1">
-                                    <span class="text-[9px] text-cyan-400 font-bold">WEATHER</span>
-                                    <i class="fas fa-cloud text-slate-500 text-xs"></i>
-                                </div>
-                                <div class="text-xs text-white">NASA / ERA5</div>
-                                <div class="text-[8px] text-slate-500 mt-1">Global Precip • NetCDF</div>
-                            </div>
-
-                            <!-- Card 3 -->
-                            <div class="glass-dark p-3 border-l-2 border-purple-500">
-                                <div class="flex justify-between items-center mb-1">
-                                    <span class="text-[9px] text-purple-400 font-bold">SOCIAL</span>
-                                    <i class="fas fa-hashtag text-slate-500 text-xs"></i>
-                                </div>
-                                <div class="text-xs text-white">Facility Watch</div>
-                                <div class="text-[8px] text-slate-500 mt-1">Reddit PRAW • 15m Poll</div>
-                            </div>
-                        </div>
-
-                        <!-- ARROW 1 -->
-                        <div class="flex flex-col items-center justify-center">
-                            <div class="h-[2px] w-8 bg-slate-700"></div>
-                            <i class="fas fa-chevron-right text-slate-500"></i>
-                        </div>
-
-                        <!-- 2. SIMULATION ENGINE (Centerpiece) -->
-                        <div class="w-1/3 flex flex-col justify-center">
-                            <h3 class="text-[10px] text-slate-500 font-bold uppercase text-center mb-2">Physics Twin
-                            </h3>
-
-                            <div
-                                class="bg-slate-900/80 border border-slate-700 p-6 rounded-xl relative overflow-hidden group hover:border-purple-500 transition-colors">
-                                <!-- Animated Pulse Background -->
+                                <!-- PROFIT PROJECTION -->
                                 <div
-                                    class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-purple-500/10 rounded-full blur-xl animate-pulse">
-                                </div>
-
-                                <div class="relative z-10 text-center">
-                                    <i class="fas fa-truck-moving text-3xl text-purple-400 mb-3"></i>
-                                    <h4 class="text-lg font-bold text-white">HOS Domino Engine</h4>
-                                    <p class="text-[10px] text-slate-400 font-mono mt-1">Discrete Event Sim (SimPy)</p>
-
-                                    <div class="mt-4 grid grid-cols-2 gap-2">
-                                        <div class="bg-black/40 p-2 rounded">
-                                            <div class="text-[8px] text-slate-500">NODES</div>
-                                            <div class="text-xs text-white font-mono">548</div>
+                                    class="bg-gradient-to-r from-green-900/40 to-slate-800/40 p-3 rounded border border-green-500/30 mt-2">
+                                    <div class="flex justify-between items-center">
+                                        <div class="flex flex-col">
+                                            <span
+                                                class="text-[8px] text-green-400 font-bold uppercase tracking-widest">Potential
+                                                Profit</span>
+                                            <span id="projProfit"
+                                                class="text-xl font-bold text-white font-mono">$0</span>
                                         </div>
-                                        <div class="bg-black/40 p-2 rounded">
-                                            <div class="text-[8px] text-slate-500">ROUTES</div>
-                                            <div class="text-xs text-white font-mono">2,403</div>
+                                        <div class="text-right">
+                                            <div
+                                                class="bg-green-500 text-black text-[9px] font-bold px-1 rounded inline-block mb-1">
+                                                CONFIDENCE: <span id="confScore">--</span></div>
+                                            <div class="text-[8px] text-slate-400">Lev: <span id="levBadge"
+                                                    class="text-white font-bold">--</span>x</div>
                                         </div>
                                     </div>
+                                    <div class="w-full bg-slate-800 h-1 mt-2 rounded-full overflow-hidden">
+                                        <div id="alphaWindowBar"
+                                            class="bg-yellow-400 h-full w-0 transition-all duration-1000"></div>
+                                    </div>
+                                    <div class="text-[8px] text-yellow-400 text-center mt-1">ALPHA WINDOW: <span
+                                            id="winHours">--</span> HRS</div>
                                 </div>
                             </div>
                         </div>
+                    </div>
 
-                        <!-- ARROW 2 -->
-                        <div class="flex flex-col items-center justify-center">
-                            <div class="h-[2px] w-8 bg-slate-700"></div>
-                            <i class="fas fa-chevron-right text-slate-500"></i>
-                        </div>
-
-                        <!-- 3. ALPHA GENERATION -->
-                        <div class="w-1/4 flex flex-col justify-center">
-                            <h3 class="text-[10px] text-slate-500 font-bold uppercase text-center mb-2">Alpha Signal
-                            </h3>
-
-                            <div
-                                class="bg-gradient-to-br from-slate-900 to-black border border-cyan-500/50 p-6 rounded-xl text-center shadow-[0_0_20px_rgba(6,182,212,0.1)]">
-                                <i class="fas fa-brain text-2xl text-cyan-400 mb-3"></i>
-                                <div class="text-sm font-bold text-white uppercase tracking-wider">Prediction</div>
-                                <div class="text-[10px] text-slate-500">XGBoost Regressor</div>
-
-                                <div class="mt-4 pt-4 border-t border-slate-800 space-y-1">
-                                    <div class="flex justify-between text-[10px]"><span
-                                            class="text-slate-500">Confidence</span> <span
-                                            class="text-green-400">94.2%</span></div>
-                                    <div class="flex justify-between text-[10px]"><span
-                                            class="text-slate-500">Horizon</span> <span class="text-white">4h /
-                                            1d</span>
-                                    </div>
+                    <!-- Proprietary Signals Grid -->
+                    <div class="border-t border-slate-700/50 pt-2 mt-1">
+                        <h4
+                            class="text-[9px] text-purple-400 font-bold uppercase mb-2 flex items-center justify-center">
+                            <i class="fas fa-satellite-dish mr-1"></i> Live Logistics Signals
+                        </h4>
+                        <div class="grid grid-cols-3 gap-1">
+                            <div class="bg-slate-800 p-1.5 rounded text-center">
+                                <div class="text-[8px] text-slate-500 uppercase">Fleet</div>
+                                <div id="resIoT" class="text-xs font-mono font-bold text-white">--</div>
+                            </div>
+                            <div class="bg-slate-800 p-1.5 rounded text-center">
+                                <div class="text-[8px] text-slate-500 uppercase">Port</div>
+                                <div id="resPort" class="text-xs font-mono font-bold text-white">--</div>
+                            </div>
+                            <div class="bg-slate-800 p-1.5 rounded text-center">
+                                <div class="text-[8px] text-slate-500 uppercase">Stress</div>
+                                <div id="resBreakage" class="text-xs font-mono font-bold text-white">--
                                 </div>
                             </div>
                         </div>
+                    </div>
 
+                    <!-- Data Provenance Footer -->
+                    <div id="provenanceBadge"
+                        class="flex justify-between items-center px-1 py-1 mt-1 bg-black/40 rounded border border-slate-800 hidden">
+                        <span class="text-[8px] text-green-500 font-mono"><i class="fas fa-check mr-1"></i><span
+                                id="srcMarket" class="text-slate-400">Verifying...</span></span>
+                        <span class="text-[8px] text-green-500 font-mono"><i class="fas fa-check mr-1"></i><span
+                                id="srcWeather" class="text-slate-400">Verifying...</span></span>
+                    </div>
+
+                    <!-- Intraday Chart -->
+                    <div id="hourlyResult" class="flex-1 min-h-[180px] relative border-t border-slate-700/50 mt-2 pt-2">
+                        <h5 class="text-[9px] text-slate-500 uppercase absolute top-2 left-0 z-10">High-Freq
+                            Confidence Band</h5>
+                        <canvas id="hourlyChart"></canvas>
                     </div>
                 </div>
             </div>
+        </div>
+
+
+
+        <!-- Right Column: Charts -->
+        <div id="chartsColumn" class="col-span-12 lg:col-span-8 flex flex-col space-y-4">
+            <!-- Top Chart: Returns / Equity -->
+            <div id="cardEquity"
+                class="glass-dark p-4 relative flex flex-col h-[400px] transition-all duration-500 ease-in-out z-30">
+                <div class="flex justify-between items-center mb-2">
+                    <h4 class="text-[10px] font-bold text-cyan-400 uppercase"><i
+                            class="fas fa-chart-line mr-2"></i>Algorithm Equity Curve</h4>
+                    <button onclick="toggleChartFullscreen('cardEquity', 'equityChart')"
+                        class="text-slate-500 hover:text-white transition-colors"><i class="fas fa-expand"></i></button>
+                </div>
+                <div class="flex-1 relative w-full h-full">
+                    <canvas id="equityChart"></canvas>
+                </div>
+            </div>
+            <!-- Bottom Chart: Prediction vs Actual -->
+            <div id="cardPrice"
+                class="glass-dark p-4 relative flex flex-col h-[400px] transition-all duration-500 ease-in-out z-30">
+                <div class="flex justify-between items-center mb-2">
+                    <h4 class="text-[10px] font-bold text-yellow-400 uppercase"><i
+                            class="fas fa-chart-bar mr-2"></i>Price Action: Predicted vs Actual</h4>
+                    <button onclick="toggleChartFullscreen('cardPrice', 'priceChart')"
+                        class="text-slate-500 hover:text-white transition-colors"><i class="fas fa-expand"></i></button>
+                </div>
+                <div class="flex-1 relative w-full h-full">
+                    <canvas id="priceChart"></canvas>
+                </div>
+            </div>
+        </div>
+        </div>
+
+
+        <!-- VIEW: L2L LAB -->
+        <div id="viewL2L" class="h-full hidden flex flex-col space-y-4 pt-4 px-6">
+            <div class="flex justify-between items-center bg-black/40 p-3 rounded border border-slate-700">
+                <h2 class="text-xl font-bold text-white uppercase tracking-widest flex items-center"><i
+                        class="fas fa-chess-board text-orange-500 mr-3"></i> Legacy L2L Agent Playground</h2>
+                <div class="flex space-x-2">
+                    <button onclick="clearL2L()"
+                        class="px-3 py-1 bg-slate-700 hover:bg-slate-600 text-xs text-white rounded">Reset Grid</button>
+                    <button onclick="runL2L()"
+                        class="px-3 py-1 bg-orange-600 hover:bg-orange-500 text-xs text-black font-bold rounded shadow-lg shadow-orange-500/20">RUN
+                        AGENT</button>
+                </div>
+            </div>
+
+            <div class="flex-1 flex gap-6 h-[500px]">
+                <!-- CONTROLS -->
+                <div class="w-1/4 glass-dark p-6 flex flex-col space-y-6">
+                    <p class="text-xs text-slate-400 leading-relaxed">
+                        Interact with the <strong>Reinforcement Learning (RL)</strong> Agent.
+                        Click on the grid to place <span class="text-red-400 font-bold">Obstacles</span>.
+                        The Agent will recalculate the optimal path using its Policy Network.
+                    </p>
+
+                    <div class="bg-black/30 p-4 rounded border border-slate-700/50">
+                        <h3 class="text-[10px] text-slate-500 uppercase font-bold mb-2">Agent Stats</h3>
+                        <div class="space-y-2">
+                            <div class="flex justify-between text-xs"><span class="text-slate-400">Status</span> <span
+                                    id="l2lStatus" class="text-green-400 font-bold">IDLE</span></div>
+                            <div class="flex justify-between text-xs"><span class="text-slate-400">Path Cost</span>
+                                <span id="l2lCost" class="text-white font-mono">0</span>
+                            </div>
+                            <div class="flex justify-between text-xs"><span class="text-slate-400">Nodes Scanned</span>
+                                <span id="l2lScanned" class="text-white font-mono">0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- GRID CANVAS -->
+                <div class="flex-1 glass-dark p-4 flex items-center justify-center bg-black/50 relative">
+                    <canvas id="l2lCanvas" width="600" height="600"
+                        class="border border-slate-700 cursor-crosshair rounded bg-[#0f172a] shadow-2xl"></canvas>
+
+                    <!-- Legend -->
+                    <div
+                        class="absolute bottom-4 left-4 flex space-x-4 bg-black/80 p-2 rounded backdrop-blur border border-slate-700">
+                        <div class="flex items-center text-[10px] text-slate-300"><span
+                                class="w-3 h-3 bg-green-500 mr-1 rounded-sm"></span> Start</div>
+                        <div class="flex items-center text-[10px] text-slate-300"><span
+                                class="w-3 h-3 bg-blue-500 mr-1 rounded-sm"></span> End</div>
+                        <div class="flex items-center text-[10px] text-slate-300"><span
+                                class="w-3 h-3 bg-red-500 mr-1 rounded-sm"></span> Barrier</div>
+                        <div class="flex items-center text-[10px] text-slate-300"><span
+                                class="w-3 h-3 bg-orange-400 mr-1 rounded-sm"></span> Path</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- VIEW: L2L LAB -->
+        <div id="viewL2L" class="h-full hidden flex flex-col space-y-4 pt-4 px-6 relative z-10">
+            <div class="flex justify-between items-center bg-black/40 p-3 rounded border border-slate-700">
+                <h2 class="text-xl font-bold text-white uppercase tracking-widest flex items-center"><i
+                        class="fas fa-chess-board text-orange-500 mr-3"></i> Legacy L2L Agent Playground</h2>
+                <div class="flex space-x-2">
+                    <button onclick="clearL2L()"
+                        class="px-3 py-1 bg-slate-700 hover:bg-slate-600 text-xs text-white rounded">Reset Grid</button>
+                    <button onclick="runL2L()"
+                        class="px-3 py-1 bg-orange-600 hover:bg-orange-500 text-xs text-black font-bold rounded shadow-lg shadow-orange-500/20">RUN
+                        AGENT</button>
+                </div>
+            </div>
+
+            <div class="flex-1 flex gap-6 h-[500px]">
+                <!-- CONTROLS -->
+                <div class="w-1/4 glass-dark p-6 flex flex-col space-y-6">
+                    <p class="text-xs text-slate-400 leading-relaxed">
+                        Interact with the <strong>Reinforcement Learning (RL)</strong> Agent.
+                        Click on the grid to place <span class="text-red-400 font-bold">Obstacles</span>.
+                        The Agent will recalculate the optimal path using its Policy Network.
+                    </p>
+
+                    <div class="bg-black/30 p-4 rounded border border-slate-700/50">
+                        <h3 class="text-[10px] text-slate-500 uppercase font-bold mb-2">Agent Stats</h3>
+                        <div class="space-y-2">
+                            <div class="flex justify-between text-xs"><span class="text-slate-400">Status</span> <span
+                                    id="l2lStatus" class="text-green-400 font-bold">IDLE</span></div>
+                            <div class="flex justify-between text-xs"><span class="text-slate-400">Path Cost</span>
+                                <span id="l2lCost" class="text-white font-mono">0</span>
+                            </div>
+                            <div class="flex justify-between text-xs"><span class="text-slate-400">Nodes Scanned</span>
+                                <span id="l2lScanned" class="text-white font-mono">0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- GRID CANVAS -->
+                <div class="flex-1 glass-dark p-4 flex items-center justify-center bg-black/50 relative">
+                    <canvas id="l2lCanvas" width="600" height="600"
+                        class="border border-slate-700 cursor-crosshair rounded bg-[#0f172a] shadow-2xl"></canvas>
+
+                    <!-- Legend -->
+                    <div
+                        class="absolute bottom-4 left-4 flex space-x-4 bg-black/80 p-2 rounded backdrop-blur border border-slate-700">
+                        <div class="flex items-center text-[10px] text-slate-300"><span
+                                class="w-3 h-3 bg-green-500 mr-1 rounded-sm"></span> Start</div>
+                        <div class="flex items-center text-[10px] text-slate-300"><span
+                                class="w-3 h-3 bg-blue-500 mr-1 rounded-sm"></span> End</div>
+                        <div class="flex items-center text-[10px] text-slate-300"><span
+                                class="w-3 h-3 bg-red-500 mr-1 rounded-sm"></span> Barrier</div>
+                        <div class="flex items-center text-[10px] text-slate-300"><span
+                                class="w-3 h-3 bg-orange-400 mr-1 rounded-sm"></span> Path</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- VIEW: INTERNALS (Data Pipeline Architecture) -->
+        <div id="viewInternals" class="h-full hidden bg-[#0B0F19] p-6 relative">
+            <!-- BACKGROUND & DECORATION -->
+            <div class="absolute inset-0 z-0 opacity-10 pointer-events-none"
+                style="background-image: radial-gradient(#334155 1px, transparent 1px); background-size: 20px 20px;">
+            </div>
+
+            <div class="relative z-10 h-full flex flex-col">
+                <!-- Header -->
+                <div class="mb-4 flex justify-between items-center px-4">
+                    <div>
+                        <h2 class="text-xl font-bold text-white uppercase tracking-widest"><i
+                                class="fas fa-network-wired text-cyan-400 mr-2"></i>AgriFlow Intelligence</h2>
+                        <p class="text-slate-500 text-[10px] mt-1">Live Data Lineage Map</p>
+                    </div>
+                    <div class="flex space-x-4 text-[9px] text-slate-400 uppercase">
+                        <div class="flex items-center"><span
+                                class="w-2 h-2 rounded-full bg-green-500 mr-1 animate-pulse"></span> Ingest Active
+                        </div>
+                        <div class="flex items-center"><span class="w-2 h-2 rounded-full bg-purple-500 mr-1"></span>
+                            Simulation Running</div>
+                    </div>
+                </div>
+
+                <!-- PIPELINE FLEX CONTAINER (Fit-to-Screen) -->
+                <div class="flex-1 flex flex-row items-center justify-between gap-4 px-4 overflow-hidden">
+
+                    <!-- 1. SOURCE CLUSTER -->
+                    <div class="flex flex-col space-y-4 w-1/4">
+                        <h3 class="text-[10px] text-slate-500 font-bold uppercase text-center mb-2">Data Ingestion
+                        </h3>
+
+                        <!-- Card 1 -->
+                        <div class="glass-dark p-3 border-l-2 border-green-500">
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="text-[9px] text-green-400 font-bold">MARKET</span>
+                                <i class="fas fa-chart-line text-slate-500 text-xs"></i>
+                            </div>
+                            <div class="text-xs text-white">NYSE/CME Feed</div>
+                            <div class="text-[8px] text-slate-500 mt-1">Tick-Level • ~50ms</div>
+                        </div>
+
+                        <!-- Card 2 -->
+                        <div class="glass-dark p-3 border-l-2 border-cyan-500">
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="text-[9px] text-cyan-400 font-bold">WEATHER</span>
+                                <i class="fas fa-cloud text-slate-500 text-xs"></i>
+                            </div>
+                            <div class="text-xs text-white">NASA / ERA5</div>
+                            <div class="text-[8px] text-slate-500 mt-1">Global Precip • NetCDF</div>
+                        </div>
+
+                        <!-- Card 3 -->
+                        <div class="glass-dark p-3 border-l-2 border-purple-500">
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="text-[9px] text-purple-400 font-bold">SOCIAL</span>
+                                <i class="fas fa-hashtag text-slate-500 text-xs"></i>
+                            </div>
+                            <div class="text-xs text-white">Facility Watch</div>
+                            <div class="text-[8px] text-slate-500 mt-1">Reddit PRAW • 15m Poll</div>
+                        </div>
+
+                        <!-- Card 4: CV Vision (New) -->
+                        <div class="glass-dark p-3 border-l-2 border-yellow-500 relative overflow-hidden group">
+                            <div class="absolute inset-0 bg-black/50 z-0">
+                                <div class="absolute top-2 right-2 flex items-center space-x-1 z-20">
+                                    <span class="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse"></span>
+                                    <span class="text-[8px] font-bold text-red-500 uppercase">LIVE REC</span>
+                                </div>
+                            </div>
+                            <div class="relative z-10">
+                                <div class="flex justify-between items-center mb-1">
+                                    <span class="text-[9px] text-yellow-400 font-bold">TRAFFIC VISION</span>
+                                    <i class="fas fa-video text-slate-500 text-xs"></i>
+                                </div>
+                                <div class="text-xs text-white">I-80 Des Moines CAM-04</div>
+                                <div class="text-[8px] text-slate-500 mt-1">YOLOv8 • 30fps • <span
+                                        class="text-green-400">98% Conf</span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ARROW 1 -->
+                    <div class="flex flex-col items-center justify-center">
+                        <div class="h-[2px] w-8 bg-slate-700"></div>
+                        <i class="fas fa-chevron-right text-slate-500"></i>
+                    </div>
+
+                    <!-- 2. SIMULATION ENGINE (Centerpiece) -->
+                    <div class="w-1/3 flex flex-col justify-center">
+                        <h3 class="text-[10px] text-slate-500 font-bold uppercase text-center mb-2">Physics Twin
+                        </h3>
+
+                        <div
+                            class="bg-slate-900/80 border border-slate-700 p-6 rounded-xl relative overflow-hidden group hover:border-purple-500 transition-colors">
+                            <!-- Animated Pulse Background -->
+                            <div
+                                class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-purple-500/10 rounded-full blur-xl animate-pulse">
+                            </div>
+
+                            <div class="relative z-10 text-center">
+                                <i class="fas fa-truck-moving text-3xl text-purple-400 mb-3"></i>
+                                <h4 class="text-lg font-bold text-white">HOS Domino Engine</h4>
+                                <p class="text-[10px] text-slate-400 font-mono mt-1">Discrete Event Sim (SimPy)</p>
+
+                                <div class="mt-4 grid grid-cols-2 gap-2">
+                                    <div class="bg-black/40 p-2 rounded">
+                                        <div class="text-[8px] text-slate-500">NODES</div>
+                                        <div class="text-xs text-white font-mono">548</div>
+                                    </div>
+                                    <div class="bg-black/40 p-2 rounded">
+                                        <div class="text-[8px] text-slate-500">ROUTES</div>
+                                        <div class="text-xs text-white font-mono">2,403</div>
+                                    </div>
+                                </div>
+                                <div
+                                    class="mt-2 bg-black/40 p-2 rounded flex justify-between items-center text-xs border border-orange-500/20">
+                                    <div class="text-[8px] text-slate-500">LEGACY CORE</div>
+                                    <div class="text-orange-400 font-mono font-bold flex items-center text-[9px]"><i
+                                            class="fas fa-microchip mr-1"></i> L2L AGENT ONLINE</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ARROW 2 -->
+                <div class="flex flex-col items-center justify-center">
+                    <div class="h-[2px] w-8 bg-slate-700"></div>
+                    <i class="fas fa-chevron-right text-slate-500"></i>
+                </div>
+
+                <!-- 3. ALPHA GENERATION -->
+                <div class="w-1/4 flex flex-col justify-center">
+                    <h3 class="text-[10px] text-slate-500 font-bold uppercase text-center mb-2">Alpha Signal
+                    </h3>
+
+                    <div
+                        class="bg-gradient-to-br from-slate-900 to-black border border-cyan-500/50 p-6 rounded-xl text-center shadow-[0_0_20px_rgba(6,182,212,0.1)]">
+                        <i class="fas fa-brain text-2xl text-cyan-400 mb-3"></i>
+                        <div class="text-sm font-bold text-white uppercase tracking-wider">Prediction</div>
+                        <div class="text-[10px] text-slate-500">XGBoost Regressor</div>
+
+                        <div class="mt-4 pt-4 border-t border-slate-800 space-y-1">
+                            <div class="flex justify-between text-[10px]"><span class="text-slate-500">Confidence</span>
+                                <span class="text-green-400">94.2%</span>
+                            </div>
+                            <div class="flex justify-between text-[10px]"><span class="text-slate-500">Horizon</span>
+                                <span class="text-white">4h /
+                                    1d</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        </div>
 
         </div>
 
@@ -672,13 +836,92 @@
                                 Stream</span></div>
                     </div>
                 </div>
+
+                <!-- Computer Vision (New) -->
+                <div class="bg-slate-800/50 p-4 rounded-xl border border-yellow-500/50 relative">
+                    <div class="flex items-center mb-2">
+                        <i class="fas fa-video text-yellow-400 text-lg mr-2"></i>
+                        <h3 class="text-sm font-bold text-white uppercase">Traffic Vision</h3>
+                    </div>
+                    <div class="text-xs text-slate-400 space-y-1">
+                        <div class="flex justify-between"><span>Feed:</span> <span class="text-white">DOT RTSP
+                                Streams</span></div>
+                        <div class="flex justify-between"><span>Model:</span> <span class="text-white">YOLOv8 + Optical
+                                Flow</span></div>
+                        <div class="flex justify-between"><span>Output:</span> <span class="text-white">Freight
+                                Density</span></div>
+                    </div>
+                </div>
+
+                <!-- Legacy L2L (New) -->
+                <div class="bg-slate-800/50 p-4 rounded-xl border border-orange-500/50 relative">
+                    <div class="flex items-center mb-2">
+                        <i class="fas fa-chess-board text-orange-400 text-lg mr-2"></i>
+                        <h3 class="text-sm font-bold text-white uppercase">L2L Legacy Agent</h3>
+                    </div>
+                    <div class="text-xs text-slate-400 space-y-1">
+                        <div class="flex justify-between"><span>Core:</span> <span class="text-white">PyTorch RL
+                                (PPO)</span></div>
+                        <div class="flex justify-between"><span>Map:</span> <span class="text-white">OpenStreetMap
+                                (OSMnx)</span></div>
+                        <div class="flex justify-between"><span>Role:</span> <span class="text-white">Route Complexity
+                                Score</span></div>
+                    </div>
+                </div>
             </div>
 
-            <div class="mt-8 text-center">
-                <p class="text-[10px] text-slate-500 uppercase tracking-widest">AgriFlow Intelligence Ecosystem v0.0.1
-                </p>
+            <div class="mt-8 border-t border-slate-700 pt-6">
+                <h3 class="text-sm font-bold text-white uppercase mb-4 text-center">Information Fusion Pipeline</h3>
+                <div class="flex items-center justify-between text-center relative">
+                    <!-- Step 1 -->
+                    <div class="flex flex-col items-center z-10 w-24">
+                        <div
+                            class="w-8 h-8 rounded-full bg-slate-800 border border-slate-600 flex items-center justify-center mb-2">
+                            <i class="fas fa-satellite text-cyan-400 text-xs"></i>
+                        </div>
+                        <div class="text-[9px] text-slate-400 font-bold uppercase">Raw Signal</div>
+                        <div class="text-[8px] text-slate-500 mt-1">Satellite, CV, Market</div>
+                    </div>
+                    <!-- Arrow -->
+                    <div class="flex-1 h-[2px] bg-slate-800 relative top-[-20px]"></div>
+
+                    <!-- Step 2 -->
+                    <div class="flex flex-col items-center z-10 w-24">
+                        <div
+                            class="w-8 h-8 rounded-full bg-slate-800 border border-purple-500/50 flex items-center justify-center mb-2">
+                            <i class="fas fa-microchip text-purple-400 text-xs"></i>
+                        </div>
+                        <div class="text-[9px] text-purple-400 font-bold uppercase">Physics Twin</div>
+                        <div class="text-[8px] text-slate-500 mt-1">SimPy + L2L Agent</div>
+                    </div>
+                    <!-- Arrow -->
+                    <div class="flex-1 h-[2px] bg-slate-800 relative top-[-20px]"></div>
+
+                    <!-- Step 3 -->
+                    <div class="flex flex-col items-center z-10 w-24">
+                        <div
+                            class="w-8 h-8 rounded-full bg-slate-800 border border-green-500/50 flex items-center justify-center mb-2">
+                            <i class="fas fa-brain text-green-400 text-xs"></i>
+                        </div>
+                        <div class="text-[9px] text-green-400 font-bold uppercase">Alpha Engine</div>
+                        <div class="text-[8px] text-slate-500 mt-1">Predictor + Risk</div>
+                    </div>
+                    <!-- Arrow -->
+                    <div class="flex-1 h-[2px] bg-slate-800 relative top-[-20px]"></div>
+
+                    <!-- Step 4 -->
+                    <div class="flex flex-col items-center z-10 w-24">
+                        <div
+                            class="w-8 h-8 rounded-full bg-slate-800 border border-yellow-500/50 flex items-center justify-center mb-2">
+                            <i class="fas fa-bolt text-yellow-400 text-xs"></i>
+                        </div>
+                        <div class="text-[9px] text-yellow-400 font-bold uppercase">Execution</div>
+                        <div class="text-[8px] text-slate-500 mt-1">Leveraged Entry</div>
+                    </div>
+                </div>
             </div>
         </div>
+    </div>
     </div>
 
     <script>
@@ -688,44 +931,67 @@
         // --- NAVIGATION ---
         function setMode(mode) {
             // Reset Buttons
-            ['Logistics', 'Alpha', 'Internals'].forEach(m => document.getElementById('btn' + m).className = "px-4 py-2 text-xs font-bold rounded text-slate-400 hover:text-white transition-all");
-            document.getElementById('btn' + (mode.charAt(0).toUpperCase() + mode.slice(1))).className = "px-4 py-2 text-xs font-bold rounded bg-slate-700 text-white shadow";
+            ['Logistics', 'Alpha', 'Internals', 'L2L'].forEach(m => {
+                const btn = document.getElementById('btn' + m);
+                if (btn) btn.className = "px-4 py-2 text-xs font-bold rounded text-slate-400 hover:text-white transition-all";
+            });
+
+            // Highlight Active
+            const activeBtn = document.getElementById('btn' + (mode === 'l2l' ? 'L2L' : mode.charAt(0).toUpperCase() + mode.slice(1)));
+            if (activeBtn) {
+                if (mode === 'l2l') activeBtn.className = "px-4 py-2 text-xs font-bold rounded bg-orange-700 text-white shadow transition-all border-l border-slate-700 ml-2 pl-4";
+                else activeBtn.className = "px-4 py-2 text-xs font-bold rounded bg-slate-700 text-white shadow";
+            }
 
             // Hide All Views first
             document.getElementById('viewLogistics').classList.add('hidden');
             document.getElementById('viewAlpha').classList.add('hidden');
             document.getElementById('viewInternals').classList.add('hidden');
+            document.getElementById('viewL2L').classList.add('hidden');
+
+            // Explicitly hide Charts Column (Fix for layout leak)
+            const charts = document.getElementById('chartsColumn');
+            if (charts) charts.classList.add('hidden');
 
             // Hide All Controls
             document.getElementById('ctrlLogistics').classList.add('hidden');
             document.getElementById('ctrlAlpha').classList.add('hidden');
-            document.getElementById('ctrlInternal').classList.add('hidden');
 
             // Layout Elements
             const sidebar = document.getElementById('sidebarContainer');
             const mainContent = document.getElementById('mainContentContainer');
 
+            // Reset Columns
+            sidebar.classList.remove('hidden');
+            sidebar.classList.add('col-span-3', 'flex');
+            mainContent.classList.remove('col-span-12');
+            mainContent.classList.add('col-span-9');
+
             if (mode === 'internals') {
                 // HIDE SIDEBAR -> FULL WIDTH
                 sidebar.classList.add('hidden');
                 sidebar.classList.remove('col-span-3', 'flex');
-
                 mainContent.classList.remove('col-span-9');
                 mainContent.classList.add('col-span-12');
-
                 document.getElementById('viewInternals').classList.remove('hidden');
+
+            } else if (mode === 'l2l') {
+                // L2L is also Full Width
+                sidebar.classList.add('hidden');
+                sidebar.classList.remove('col-span-3', 'flex');
+                mainContent.classList.remove('col-span-9');
+                mainContent.classList.add('col-span-12');
+                document.getElementById('viewL2L').classList.remove('hidden');
+                if (window.initL2L) setTimeout(initL2L, 100);
 
             } else {
                 // SHOW SIDEBAR -> SPLIT VIEW
-                sidebar.classList.remove('hidden');
-                sidebar.classList.add('col-span-3', 'flex');
-
-                mainContent.classList.remove('col-span-12');
-                mainContent.classList.add('col-span-9');
-
                 // Show Specific View & Control
                 const viewId = 'view' + (mode.charAt(0).toUpperCase() + mode.slice(1));
                 document.getElementById(viewId).classList.remove('hidden');
+
+                // Show Charts ONLY for Alpha
+                if (mode === 'alpha' && charts) charts.classList.remove('hidden');
 
                 const ctrlId = 'ctrl' + (mode === 'logistics' ? 'Logistics' : 'Alpha');
                 const ctrl = document.getElementById(ctrlId);
@@ -866,22 +1132,20 @@
                 document.getElementById('resMove').innerText = "ACTUAL MOVE: " + data.actual_move;
 
                 document.getElementById('resIoT').innerText = data.satellite_data.iot_telematics_speed_avg + " mph";
-                document.getElementById('resPort').innerText = data.satellite_data.port_congestion_index + " days";
-                document.getElementById('resBreakage').innerText = data.satellite_data.logistics_disruption_score + "/100";
+                document.getElementById('resPort').innerText = "+" + data.satellite_data.port_congestion_index + "d";
+                document.getElementById('resBreakage').innerText = (data.satellite_data.logistics_disruption_score > 50 ? "CRITICAL" : "OK");
 
-                if (data.data_provenance) {
-                    document.getElementById('srcMarket').innerText = data.data_provenance.market_feed;
-                    document.getElementById('srcWeather').innerText = data.data_provenance.weather_feed;
+                // Metrics Update (Profit Calc)
+                if (data.alpha_metrics) {
+                    window.lastAlphaMetrics = data.alpha_metrics;
+                    document.getElementById('confScore').innerText = data.alpha_metrics.confidence_score + "%";
+                    document.getElementById('levBadge').innerText = data.alpha_metrics.suggested_leverage;
+                    document.getElementById('winHours').innerText = data.alpha_metrics.window_hours;
+                    document.getElementById('alphaWindowBar').style.width = Math.min((data.alpha_metrics.window_hours / 48) * 100, 100) + "%";
+                    updateProfitCalc();
                 }
 
-                // Keep the traffic index for reference if needed, or remove
-                // document.getElementById('resTraffic').innerText = ... 
-
-                const badge = document.getElementById('resVerdict');
-                if (data.correct_direction) { badge.innerText = "CORRECT"; badge.className = "px-2 py-1 bg-green-500 text-black font-bold text-[10px] rounded uppercase shadow-lg shadow-green-500/20"; }
-                else { badge.innerText = "INCORRECT"; badge.className = "px-2 py-1 bg-red-500 text-black font-bold text-[10px] rounded uppercase shadow-lg shadow-red-500/20"; }
-
-                // HOURLY CHART RENDERING w/ CONFIDENCE BANDS
+                // Render Chart
                 if (data.hourly_forecast) {
                     if (hourlyChart) hourlyChart.destroy();
 
@@ -972,8 +1236,9 @@
             const originalText = btn.innerHTML;
 
             const ticker = document.getElementById('ticker').value;
+            const capital = document.getElementById('btCapital').value;
             try {
-                const res = await fetch('/run_backtest', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ start: '2024-01-01', end: '2024-03-31', ticker }) });
+                const res = await fetch('/run_backtest', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ start: '2024-01-01', end: '2024-03-31', ticker, capital }) });
                 const data = await res.json();
 
                 btn.classList.remove('loading-btn'); // Stop Loading
@@ -982,8 +1247,10 @@
 
                 document.getElementById('backtestStats').classList.remove('opacity-50');
                 document.getElementById('btAcc').innerText = data.accuracy + "%";
-                document.getElementById('btRoi').innerText = (data.roi > 0 ? "+" : "") + data.roi + "%";
-                document.getElementById('btRoi').className = data.roi > 0 ? "text-xl font-bold text-green-400" : "text-xl font-bold text-red-400";
+                let capVal = parseFloat(capital);
+                let profit = data.final_capital - capVal;
+                document.getElementById('btRoi').innerText = (profit >= 0 ? "+" : "") + "$" + Math.round(profit).toLocaleString() + " (" + data.roi + "%)";
+                document.getElementById('btRoi').className = profit >= 0 ? "text-xs font-bold text-green-400 font-mono" : "text-xs font-bold text-red-400 font-mono";
                 const labels = data.curve.map(x => x.date);
 
                 // Chart 1: Equity
@@ -1016,6 +1283,169 @@
 
             } catch (e) { console.error(e); }
             btn.innerText = "RUN Q1 2024 BACKTEST";
+        }
+        // --- L2L LAB LOGIC ---
+
+        let l2lData = null; // Stores nodes, edges, path
+        let l2lObstacles = []; // List of blocked Node IDs
+        let l2lCanvas = null;
+        let l2lCtx = null;
+
+        function initL2L() {
+            l2lCanvas = document.getElementById('l2lCanvas');
+            if (!l2lCanvas) return;
+            l2lCtx = l2lCanvas.getContext('2d');
+
+            // Interaction: Click Node to Toggle Obstacle
+            if (!l2lCanvas.hasClick) {
+                l2lCanvas.addEventListener('click', function (evt) {
+                    if (!l2lData) return;
+
+                    let rect = l2lCanvas.getBoundingClientRect();
+                    let scaleX = l2lCanvas.width / rect.width;
+                    let scaleY = l2lCanvas.height / rect.height;
+                    let x = (evt.clientX - rect.left) * scaleX;
+                    let y = (evt.clientY - rect.top) * scaleY;
+
+                    // Find nearest node
+                    let minDist = 9999;
+                    let nearestId = -1;
+
+                    l2lData.nodes.forEach(n => {
+                        // Map coordinates 0-100 to Canvas W/H
+                        // Add margin for drawing
+                        let nx = 50 + n.x / 100 * (l2lCanvas.width - 100);
+                        let ny = 50 + n.y / 100 * (l2lCanvas.height - 100);
+
+                        let d = Math.sqrt((x - nx) ** 2 + (y - ny) ** 2);
+                        if (d < 15) { // Hit radius
+                            minDist = d;
+                            nearestId = n.id;
+                        }
+                    });
+
+                    if (nearestId !== -1) {
+                        // Toggle
+                        let exists = l2lObstacles.indexOf(nearestId);
+                        if (exists >= 0) {
+                            l2lObstacles.splice(exists, 1);
+                        } else {
+                            // Cannot block start/end
+                            if (nearestId !== l2lData.start && nearestId !== l2lData.end) {
+                                l2lObstacles.push(nearestId);
+                            }
+                        }
+                        runL2L(true); // Re-run immediately to update path
+                    }
+                });
+                l2lCanvas.hasClick = true;
+            }
+
+            // Initial Run to get Map Structure
+            runL2L();
+        }
+
+        function drawL2LMap() {
+            if (!l2lCtx || !l2lData) return;
+            let w = l2lCanvas.width;
+            let h = l2lCanvas.height;
+            l2lCtx.clearRect(0, 0, w, h);
+
+            // Draw Edges (Roads)
+            l2lCtx.lineWidth = 2;
+            l2lData.edges.forEach(e => {
+                let u = l2lData.nodes.find(n => n.id === e.u);
+                let v = l2lData.nodes.find(n => n.id === e.v);
+                if (!u || !v) return;
+
+                let ux = 50 + u.x / 100 * (w - 100);
+                let uy = 50 + u.y / 100 * (h - 100);
+                let vx = 50 + v.x / 100 * (w - 100);
+                let vy = 50 + v.y / 100 * (h - 100);
+
+                l2lCtx.strokeStyle = '#334155'; // Dark Slate
+                l2lCtx.beginPath(); l2lCtx.moveTo(ux, uy); l2lCtx.lineTo(vx, vy); l2lCtx.stroke();
+            });
+
+            // Draw Path (Highlight Edges)
+            if (l2lData.path && l2lData.path.length > 1) {
+                l2lCtx.lineWidth = 4;
+                l2lCtx.strokeStyle = '#f97316'; // Orange
+                l2lCtx.lineCap = 'round';
+
+                l2lCtx.beginPath();
+                // Map path node IDs to coordinates
+                for (let i = 0; i < l2lData.path.length - 1; i++) {
+                    let u = l2lData.nodes.find(n => n.id === l2lData.path[i]);
+                    let v = l2lData.nodes.find(n => n.id === l2lData.path[i + 1]);
+                    if (!u || !v) continue;
+
+                    let ux = 50 + u.x / 100 * (w - 100);
+                    let uy = 50 + u.y / 100 * (h - 100);
+                    let vx = 50 + v.x / 100 * (w - 100);
+                    let vy = 50 + v.y / 100 * (h - 100);
+                    l2lCtx.moveTo(ux, uy); l2lCtx.lineTo(vx, vy);
+                }
+                l2lCtx.stroke();
+            }
+
+            // Draw Nodes (Intersections)
+            l2lData.nodes.forEach(n => {
+                let cx = 50 + n.x / 100 * (w - 100);
+                let cy = 50 + n.y / 100 * (h - 100);
+
+                l2lCtx.beginPath();
+                l2lCtx.arc(cx, cy, 6, 0, 2 * Math.PI);
+
+                if (n.id === l2lData.start) l2lCtx.fillStyle = '#22c55e'; // Green
+                else if (n.id === l2lData.end) l2lCtx.fillStyle = '#3b82f6'; // Blue
+                else if (l2lObstacles.includes(n.id)) l2lCtx.fillStyle = '#ef4444'; // Red
+                else l2lCtx.fillStyle = '#94a3b8'; // Slate
+
+                l2lCtx.fill();
+
+                // Pulse Start
+                if (n.id === l2lData.start) {
+                    l2lCtx.beginPath(); l2lCtx.arc(cx, cy, 10, 0, 2 * Math.PI);
+                    l2lCtx.strokeStyle = '#22c55e'; l2lCtx.stroke();
+                }
+            });
+        }
+
+        function runL2L(updateOnly = false) {
+            document.getElementById('l2lStatus').innerText = "OPTIMIZING...";
+
+            fetch('/run_l2l_demo', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ obstacles: l2lObstacles })
+            })
+                .then(r => r.json())
+                .then(d => {
+                    if (d.error) { alert(d.error); return; }
+                    l2lData = d;
+                    drawL2LMap();
+
+                    document.getElementById('l2lStatus').innerText = "OPTIMAL PATH FOUND";
+                    document.getElementById('l2lCost').innerText = d.path.length > 0 ? (d.path.length - 1) + " hops" : "BLOCKED";
+                    document.getElementById('l2lScanned').innerText = d.nodes.length + " nodes";
+                });
+        }
+
+        function clearL2L() {
+            l2lObstacles = [];
+            runL2L();
+        }
+
+        function updateProfitCalc() {
+            let cap = parseInt(document.getElementById('capitalSlider').value);
+            document.getElementById('capitalLabel').innerText = "$" + cap.toLocaleString();
+
+            if (window.lastAlphaMetrics) {
+                let roi = window.lastAlphaMetrics.potential_roi_pct;
+                let profit = cap * (roi / 100.0);
+                document.getElementById('projProfit').innerText = "$" + Math.round(profit).toLocaleString();
+            }
         }
     </script>
 </body>

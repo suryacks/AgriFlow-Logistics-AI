@@ -3,7 +3,8 @@ from flask import Flask, render_template, request, jsonify, send_file
 import pandas as pd
 import numpy as np
 import time
-from src.logistics.simulation_engine import SimulationEngine
+from src.core.simulation_engine import SimulationEngine
+from src.core.l2l.wrapper import L2LInterface # New
 from src.alpha.plot import AlphaPlotter 
 from src.alpha.predictor import AgriAlphaPredictor # New
 
@@ -23,16 +24,6 @@ def predict_event():
     ticker = data.get('ticker', 'DC=F')
     
     result = predictor.predict_single_event(date, ticker)
-    return jsonify(result)
-
-@app.route('/run_backtest', methods=['POST'])
-def run_backtest():
-    data = request.json
-    start = data.get('start', '2024-01-01')
-    end = data.get('end', '2024-03-31')
-    ticker = data.get('ticker', 'DC=F')
-    
-    result = predictor.run_backtest(start, end, ticker)
     return jsonify(result)
 
 @app.route('/run_simulation', methods=['POST'])
@@ -87,6 +78,19 @@ def run_simulation():
         print(f"CRITICAL SIM ERROR: {error_msg}")
         return jsonify({"error": str(e), "trace": error_msg}), 500
 
+
+@app.route('/run_backtest', methods=['POST'])
+def run_backtest():
+    data = request.json
+    start = data.get('start', '2024-01-01')
+    end = data.get('end', '2024-03-31')
+    ticker = data.get('ticker', 'DC=F')
+    capital = float(data.get('capital', 10000))
+    
+    predictor = AgriAlphaPredictor()
+    result = predictor.run_backtest(start_date=start, end_date=end, ticker=ticker, initial_capital=capital)
+    return jsonify(result)
+
 @app.route('/generate_alpha_chart', methods=['POST'])
 def generate_alpha():
     data = request.json
@@ -100,6 +104,20 @@ def generate_alpha():
         return send_file(buf, mimetype='image/png')
     else:
         return jsonify({"error": "No Data Found"}), 404
+
+@app.route('/run_l2l_demo', methods=['POST'])
+def run_l2l_demo():
+    try:
+        data = request.json
+        obstacles = data.get('obstacles', [])
+        
+        l2l = L2LInterface()
+        # New Signature: nodes_count=40, obstacles=[]
+        result = l2l.run_grid_demo(obstacles=obstacles)
+        
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
