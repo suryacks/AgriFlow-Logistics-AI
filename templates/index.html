@@ -197,20 +197,20 @@
             <!-- LOGISTICS CONTROLS -->
             <div id="ctrlLogistics" class="space-y-8 animate-fade-in">
                 <div>
-                    <label class="text-[10px] text-green-400 uppercase font-bold">Fleet Capacity</label>
+                    <label class="text-xs text-green-400 uppercase font-bold">Fleet Capacity</label>
                     <input type="range" id="fleetSize" min="10" max="200" value="50"
                         class="w-full mt-2 accent-green-500 h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer">
                     <div class="flex justify-between text-xs text-slate-400 mt-1"><span>10</span><span id="fleetLabel"
                             class="text-white">50 Trucks</span><span>200</span></div>
                 </div>
                 <div>
-                    <label class="text-[10px] text-red-400 uppercase font-bold">Traffic Entropy</label>
+                    <label class="text-xs text-red-400 uppercase font-bold">Traffic Entropy</label>
                     <input type="range" id="trafficProb" min="0" max="0.5" step="0.05" value="0.1"
                         class="w-full mt-2 accent-red-500 h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer">
                     <div class="text-right text-xs text-white mt-1" id="trafficLabel">10% Chaos</div>
                 </div>
                 <div>
-                    <label class="text-[10px] text-yellow-500 uppercase font-bold">Thermal Stress</label>
+                    <label class="text-xs text-yellow-500 uppercase font-bold">Thermal Stress</label>
                     <input type="range" id="heatFactor" min="0" max="1.0" step="0.1" value="0.5"
                         class="w-full mt-2 accent-yellow-500 h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer">
                     <div class="text-right text-xs text-white mt-1" id="heatLabel">50% Intensity</div>
@@ -224,7 +224,7 @@
             <!-- ALPHA CONTROLS -->
             <div id="ctrlAlpha" class="hidden space-y-6">
                 <div>
-                    <label class="text-[10px] text-cyan-400 uppercase font-bold">Target Asset</label>
+                    <label class="text-xs text-cyan-400 uppercase font-bold">Target Asset</label>
                     <select id="ticker"
                         class="w-full mt-2 bg-slate-900 border border-slate-700 rounded p-2 text-sm focus:border-cyan-500 outline-none">
                         <option value="DC=F">Class III Milk (Futures)</option>
@@ -236,7 +236,7 @@
                 <div class="border-t border-slate-800 pt-4">
                     <h3 class="text-xs font-bold text-white mb-3">Analysis Mode</h3>
                     <div class="mb-6">
-                        <label class="text-[10px] text-slate-500 uppercase">Time Machine (Predict One Event)</label>
+                        <label class="text-xs text-slate-500 uppercase">Time Machine (Predict One Event)</label>
                         <div class="flex flex-col space-y-2 mt-1">
                             <input type="date" id="predictDate" value="2024-01-16"
                                 class="bg-slate-900 border border-slate-700 rounded p-2 text-xs w-full text-white">
@@ -247,7 +247,7 @@
                         </div>
                     </div>
                     <div>
-                        <label class="text-[10px] text-slate-500 uppercase">Quarterly Simulation</label>
+                        <label class="text-xs text-slate-500 uppercase">Quarterly Simulation</label>
                         <button id="btnBacktest" onclick="runBacktest()"
                             class="w-full mt-2 py-3 border border-slate-700 hover:border-cyan-500 text-slate-300 hover:text-white text-xs font-bold rounded transition-all flex justify-center items-center space-x-2 relative">
                             <span>RUN Q1 2024 BACKTEST</span>
@@ -266,7 +266,7 @@
             <div class="mt-auto pt-6 border-t border-slate-800">
                 <div class="flex items-center space-x-2">
                     <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-                    <span class="text-[10px] font-bold text-slate-600 uppercase">System Online</span>
+                    <span class="text-xs font-bold text-slate-600 uppercase">System Online</span>
                 </div>
             </div>
         </div>
@@ -323,7 +323,7 @@
                                         class="absolute inset-0 border-2 border-cyan-500/20 rounded-full animate-ping-slow">
                                     </div>
                                 </div>
-                                <p class="text-[10px] text-slate-500 uppercase tracking-widest">Select Date & Generate
+                                <p class="text-xs text-slate-500 uppercase tracking-widest">Select Date & Generate
                                 </p>
                             </div>
 
@@ -332,25 +332,25 @@
                                 class="hidden flex-1 flex flex-col space-y-2 overflow-y-auto custom-scrollbar">
                                 <!-- Verdict Badge -->
                                 <div class="flex justify-between items-center bg-slate-800/50 p-2 rounded">
-                                    <div class="text-[10px] text-slate-400">TARGET DATE: <span id="resDate"
+                                    <div class="text-xs text-slate-400">TARGET DATE: <span id="resDate"
                                             class="text-white font-bold ml-1">--</span></div>
                                     <div id="resVerdict"
-                                        class="px-2 py-0.5 bg-slate-700 text-[9px] uppercase font-bold text-white rounded">
+                                        class="px-2 py-0.5 bg-slate-700 text-xs uppercase font-bold text-white rounded">
                                         PENDING</div>
                                 </div>
 
                                 <!-- Main Price Grid -->
                                 <div class="grid grid-cols-2 gap-2">
                                     <div class="bg-black/20 p-2 rounded border border-slate-700/50">
-                                        <div class="text-[9px] text-cyan-400 font-bold uppercase">Predicted</div>
+                                        <div class="text-xs text-cyan-400 font-bold uppercase">Predicted</div>
                                         <div id="resPred" class="text-xl font-bold text-white my-1">--</div>
-                                        <div class="text-[9px] text-slate-500">Error: <span id="resDelta"
+                                        <div class="text-xs text-slate-500">Error: <span id="resDelta"
                                                 class="text-slate-300">--</span></div>
                                     </div>
                                     <div class="bg-black/20 p-2 rounded border border-slate-700/50">
-                                        <div class="text-[9px] text-yellow-400 font-bold uppercase">Actual</div>
+                                        <div class="text-xs text-yellow-400 font-bold uppercase">Actual</div>
                                         <div id="resAct" class="text-xl font-bold text-slate-200 my-1">--</div>
-                                        <div id="resMove" class="text-[8px] text-slate-500 uppercase leading-tight">--
+                                        <div id="resMove" class="text-xs text-slate-500 uppercase leading-tight">--
                                         </div>
                                     </div>
                                 </div>
@@ -358,10 +358,10 @@
                                 <!-- CAPITAL ALLOCATION -->
                                 <div class="border-t border-slate-700/50 pt-2 mt-2">
                                     <div class="flex justify-between items-center mb-1">
-                                        <label class="text-[9px] text-slate-400 uppercase font-bold">Capital
+                                        <label class="text-xs text-slate-400 uppercase font-bold">Capital
                                             Allocation</label>
                                         <span id="capitalLabel"
-                                            class="text-[9px] text-cyan-400 font-mono">$10,000</span>
+                                            class="text-xs text-cyan-400 font-mono">$10,000</span>
                                     </div>
                                     <input type="range" id="capitalSlider" min="1000" max="100000" step="1000"
                                         value="10000"
@@ -375,16 +375,16 @@
                                     <div class="flex justify-between items-center">
                                         <div class="flex flex-col">
                                             <span
-                                                class="text-[8px] text-green-400 font-bold uppercase tracking-widest">Potential
+                                                class="text-xs text-green-400 font-bold uppercase tracking-widest">Potential
                                                 Profit</span>
                                             <span id="projProfit"
                                                 class="text-xl font-bold text-white font-mono">$0</span>
                                         </div>
                                         <div class="text-right">
                                             <div
-                                                class="bg-green-500 text-black text-[9px] font-bold px-1 rounded inline-block mb-1">
+                                                class="bg-green-500 text-black text-xs font-bold px-1 rounded inline-block mb-1">
                                                 CONFIDENCE: <span id="confScore">--</span></div>
-                                            <div class="text-[8px] text-slate-400">Lev: <span id="levBadge"
+                                            <div class="text-xs text-slate-400">Lev: <span id="levBadge"
                                                     class="text-white font-bold">--</span>x</div>
                                         </div>
                                     </div>
@@ -392,7 +392,7 @@
                                         <div id="alphaWindowBar"
                                             class="bg-yellow-400 h-full w-0 transition-all duration-1000"></div>
                                     </div>
-                                    <div class="text-[8px] text-yellow-400 text-center mt-1">ALPHA WINDOW: <span
+                                    <div class="text-xs text-yellow-400 text-center mt-1">ALPHA WINDOW: <span
                                             id="winHours">--</span> HRS</div>
                                 </div>
                             </div>
@@ -402,20 +402,20 @@
                     <!-- Proprietary Signals Grid -->
                     <div class="border-t border-slate-700/50 pt-2 mt-1">
                         <h4
-                            class="text-[9px] text-purple-400 font-bold uppercase mb-2 flex items-center justify-center">
+                            class="text-xs text-purple-400 font-bold uppercase mb-2 flex items-center justify-center">
                             <i class="fas fa-satellite-dish mr-1"></i> Live Logistics Signals
                         </h4>
                         <div class="grid grid-cols-3 gap-1">
                             <div class="bg-slate-800 p-1.5 rounded text-center">
-                                <div class="text-[8px] text-slate-500 uppercase">Fleet</div>
+                                <div class="text-xs text-slate-500 uppercase">Fleet</div>
                                 <div id="resIoT" class="text-xs font-mono font-bold text-white">--</div>
                             </div>
                             <div class="bg-slate-800 p-1.5 rounded text-center">
-                                <div class="text-[8px] text-slate-500 uppercase">Port</div>
+                                <div class="text-xs text-slate-500 uppercase">Port</div>
                                 <div id="resPort" class="text-xs font-mono font-bold text-white">--</div>
                             </div>
                             <div class="bg-slate-800 p-1.5 rounded text-center">
-                                <div class="text-[8px] text-slate-500 uppercase">Stress</div>
+                                <div class="text-xs text-slate-500 uppercase">Stress</div>
                                 <div id="resBreakage" class="text-xs font-mono font-bold text-white">--
                                 </div>
                             </div>
@@ -425,15 +425,15 @@
                     <!-- Data Provenance Footer -->
                     <div id="provenanceBadge"
                         class="flex justify-between items-center px-1 py-1 mt-1 bg-black/40 rounded border border-slate-800 hidden">
-                        <span class="text-[8px] text-green-500 font-mono"><i class="fas fa-check mr-1"></i><span
+                        <span class="text-xs text-green-500 font-mono"><i class="fas fa-check mr-1"></i><span
                                 id="srcMarket" class="text-slate-400">Verifying...</span></span>
-                        <span class="text-[8px] text-green-500 font-mono"><i class="fas fa-check mr-1"></i><span
+                        <span class="text-xs text-green-500 font-mono"><i class="fas fa-check mr-1"></i><span
                                 id="srcWeather" class="text-slate-400">Verifying...</span></span>
                     </div>
 
                     <!-- Intraday Chart -->
                     <div id="hourlyResult" class="flex-1 min-h-[180px] relative border-t border-slate-700/50 mt-2 pt-2">
-                        <h5 class="text-[9px] text-slate-500 uppercase absolute top-2 left-0 z-10">High-Freq
+                        <h5 class="text-xs text-slate-500 uppercase absolute top-2 left-0 z-10">High-Freq
                             Confidence Band</h5>
                         <canvas id="hourlyChart"></canvas>
                     </div>
@@ -449,7 +449,7 @@
             <div id="cardEquity"
                 class="glass-dark p-4 relative flex flex-col h-[600px] transition-all duration-500 ease-in-out z-30">
                 <div class="flex justify-between items-center mb-2">
-                    <h4 class="text-[10px] font-bold text-cyan-400 uppercase"><i
+                    <h4 class="text-xs font-bold text-cyan-400 uppercase"><i
                             class="fas fa-chart-line mr-2"></i>Algorithm Equity Curve</h4>
                     <button onclick="toggleChartFullscreen('cardEquity', 'equityChart')"
                         class="text-slate-500 hover:text-white transition-colors"><i class="fas fa-expand"></i></button>
@@ -462,7 +462,7 @@
             <div id="cardPrice"
                 class="glass-dark p-4 relative flex flex-col h-[600px] transition-all duration-500 ease-in-out z-30">
                 <div class="flex justify-between items-center mb-2">
-                    <h4 class="text-[10px] font-bold text-yellow-400 uppercase"><i
+                    <h4 class="text-xs font-bold text-yellow-400 uppercase"><i
                             class="fas fa-chart-bar mr-2"></i>Price Action: Predicted vs Actual</h4>
                     <button onclick="toggleChartFullscreen('cardPrice', 'priceChart')"
                         class="text-slate-500 hover:text-white transition-colors"><i class="fas fa-expand"></i></button>
@@ -498,7 +498,7 @@
                     </p>
 
                     <div class="bg-black/30 p-4 rounded border border-slate-700/50">
-                        <h3 class="text-[10px] text-slate-500 uppercase font-bold mb-2">Agent Stats</h3>
+                        <h3 class="text-xs text-slate-500 uppercase font-bold mb-2">Agent Stats</h3>
                         <div class="space-y-2">
                             <div class="flex justify-between text-xs"><span class="text-slate-400">Status</span> <span
                                     id="l2lStatus" class="text-green-400 font-bold">IDLE</span></div>
@@ -520,13 +520,13 @@
                     <!-- Legend -->
                     <div
                         class="absolute bottom-4 left-4 flex space-x-4 bg-black/80 p-2 rounded backdrop-blur border border-slate-700">
-                        <div class="flex items-center text-[10px] text-slate-300"><span
+                        <div class="flex items-center text-xs text-slate-300"><span
                                 class="w-3 h-3 bg-green-500 mr-1 rounded-sm"></span> Start</div>
-                        <div class="flex items-center text-[10px] text-slate-300"><span
+                        <div class="flex items-center text-xs text-slate-300"><span
                                 class="w-3 h-3 bg-blue-500 mr-1 rounded-sm"></span> End</div>
-                        <div class="flex items-center text-[10px] text-slate-300"><span
+                        <div class="flex items-center text-xs text-slate-300"><span
                                 class="w-3 h-3 bg-red-500 mr-1 rounded-sm"></span> Barrier</div>
-                        <div class="flex items-center text-[10px] text-slate-300"><span
+                        <div class="flex items-center text-xs text-slate-300"><span
                                 class="w-3 h-3 bg-orange-400 mr-1 rounded-sm"></span> Path</div>
                     </div>
                 </div>
@@ -546,9 +546,9 @@
                     <div>
                         <h2 class="text-xl font-bold text-white uppercase tracking-widest"><i
                                 class="fas fa-network-wired text-cyan-400 mr-2"></i>AgriFlow Intelligence</h2>
-                        <p class="text-slate-500 text-[10px] mt-1">Live Data Lineage Map</p>
+                        <p class="text-slate-500 text-xs mt-1">Live Data Lineage Map</p>
                     </div>
-                    <div class="flex space-x-4 text-[9px] text-slate-400 uppercase">
+                    <div class="flex space-x-4 text-xs text-slate-400 uppercase">
                         <div class="flex items-center"><span
                                 class="w-2 h-2 rounded-full bg-green-500 mr-1 animate-pulse"></span> Ingest Active
                         </div>
@@ -562,37 +562,37 @@
 
                     <!-- 1. SOURCE CLUSTER -->
                     <div class="flex flex-col space-y-4">
-                        <h3 class="text-[10px] text-slate-500 font-bold uppercase text-center mb-2">Data Ingestion
+                        <h3 class="text-xs text-slate-500 font-bold uppercase text-center mb-2">Data Ingestion
                         </h3>
 
                         <!-- Card 1 -->
                         <div class="glass-dark p-3 border-l-2 border-green-500">
                             <div class="flex justify-between items-center mb-1">
-                                <span class="text-[9px] text-green-400 font-bold">MARKET</span>
+                                <span class="text-xs text-green-400 font-bold">MARKET</span>
                                 <i class="fas fa-chart-line text-slate-500 text-xs"></i>
                             </div>
                             <div class="text-xs text-white">NYSE/CME Feed</div>
-                            <div class="text-[8px] text-slate-500 mt-1">Tick-Level • ~50ms</div>
+                            <div class="text-xs text-slate-500 mt-1">Tick-Level • ~50ms</div>
                         </div>
 
                         <!-- Card 2 -->
                         <div class="glass-dark p-3 border-l-2 border-cyan-500">
                             <div class="flex justify-between items-center mb-1">
-                                <span class="text-[9px] text-cyan-400 font-bold">WEATHER</span>
+                                <span class="text-xs text-cyan-400 font-bold">WEATHER</span>
                                 <i class="fas fa-cloud text-slate-500 text-xs"></i>
                             </div>
                             <div class="text-xs text-white">NASA / ERA5</div>
-                            <div class="text-[8px] text-slate-500 mt-1">Global Precip • NetCDF</div>
+                            <div class="text-xs text-slate-500 mt-1">Global Precip • NetCDF</div>
                         </div>
 
                         <!-- Card 3 -->
                         <div class="glass-dark p-3 border-l-2 border-purple-500">
                             <div class="flex justify-between items-center mb-1">
-                                <span class="text-[9px] text-purple-400 font-bold">SOCIAL</span>
+                                <span class="text-xs text-purple-400 font-bold">SOCIAL</span>
                                 <i class="fas fa-hashtag text-slate-500 text-xs"></i>
                             </div>
                             <div class="text-xs text-white">Facility Watch</div>
-                            <div class="text-[8px] text-slate-500 mt-1">Reddit PRAW • 15m Poll</div>
+                            <div class="text-xs text-slate-500 mt-1">Reddit PRAW • 15m Poll</div>
                         </div>
 
                         <!-- Card 4: CV Vision (New) -->
@@ -600,16 +600,16 @@
                             <div class="absolute inset-0 bg-black/50 z-0">
                                 <div class="absolute top-2 right-2 flex items-center space-x-1 z-20">
                                     <span class="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse"></span>
-                                    <span class="text-[8px] font-bold text-red-500 uppercase">LIVE REC</span>
+                                    <span class="text-xs font-bold text-red-500 uppercase">LIVE REC</span>
                                 </div>
                             </div>
                             <div class="relative z-10">
                                 <div class="flex justify-between items-center mb-1">
-                                    <span class="text-[9px] text-yellow-400 font-bold">TRAFFIC VISION</span>
+                                    <span class="text-xs text-yellow-400 font-bold">TRAFFIC VISION</span>
                                     <i class="fas fa-video text-slate-500 text-xs"></i>
                                 </div>
                                 <div class="text-xs text-white">I-80 Des Moines CAM-04</div>
-                                <div class="text-[8px] text-slate-500 mt-1">YOLOv8 • 30fps • <span
+                                <div class="text-xs text-slate-500 mt-1">YOLOv8 • 30fps • <span
                                         class="text-green-400">98% Conf</span></div>
                             </div>
                         </div>
@@ -623,7 +623,7 @@
 
                     <!-- 2. SIMULATION ENGINE (Centerpiece) -->
                     <div class=" flex flex-col justify-center">
-                        <h3 class="text-[10px] text-slate-500 font-bold uppercase text-center mb-2">Physics Twin
+                        <h3 class="text-xs text-slate-500 font-bold uppercase text-center mb-2">Physics Twin
                         </h3>
 
                         <div
@@ -636,22 +636,22 @@
                             <div class="relative z-10 text-center">
                                 <i class="fas fa-truck-moving text-3xl text-purple-400 mb-3"></i>
                                 <h4 class="text-lg font-bold text-white">HOS Domino Engine</h4>
-                                <p class="text-[10px] text-slate-400 font-mono mt-1">Discrete Event Sim (SimPy)</p>
+                                <p class="text-xs text-slate-400 font-mono mt-1">Discrete Event Sim (SimPy)</p>
 
                                 <div class="mt-4 grid grid-cols-2 gap-2">
                                     <div class="bg-black/40 p-2 rounded">
-                                        <div class="text-[8px] text-slate-500">NODES</div>
+                                        <div class="text-xs text-slate-500">NODES</div>
                                         <div class="text-xs text-white font-mono">548</div>
                                     </div>
                                     <div class="bg-black/40 p-2 rounded">
-                                        <div class="text-[8px] text-slate-500">ROUTES</div>
+                                        <div class="text-xs text-slate-500">ROUTES</div>
                                         <div class="text-xs text-white font-mono">2,403</div>
                                     </div>
                                 </div>
                                 <div
                                     class="mt-2 bg-black/40 p-2 rounded flex justify-between items-center text-xs border border-orange-500/20">
-                                    <div class="text-[8px] text-slate-500">LEGACY CORE</div>
-                                    <div class="text-orange-400 font-mono font-bold flex items-center text-[9px]"><i
+                                    <div class="text-xs text-slate-500">LEGACY CORE</div>
+                                    <div class="text-orange-400 font-mono font-bold flex items-center text-xs"><i
                                             class="fas fa-microchip mr-1"></i> L2L AGENT ONLINE</div>
                                 </div>
                             </div>
@@ -667,20 +667,20 @@
 
                 <!-- 3. ALPHA GENERATION -->
                 <div class=" flex flex-col justify-center">
-                    <h3 class="text-[10px] text-slate-500 font-bold uppercase text-center mb-2">Alpha Signal
+                    <h3 class="text-xs text-slate-500 font-bold uppercase text-center mb-2">Alpha Signal
                     </h3>
 
                     <div
                         class="bg-gradient-to-br from-slate-900 to-black border border-cyan-500/50 p-6 rounded-xl text-center shadow-[0_0_20px_rgba(6,182,212,0.1)]">
                         <i class="fas fa-brain text-2xl text-cyan-400 mb-3"></i>
                         <div class="text-sm font-bold text-white uppercase tracking-wider">Prediction</div>
-                        <div class="text-[10px] text-slate-500">XGBoost Regressor</div>
+                        <div class="text-xs text-slate-500">XGBoost Regressor</div>
 
                         <div class="mt-4 pt-4 border-t border-slate-800 space-y-1">
-                            <div class="flex justify-between text-[10px]"><span class="text-slate-500">Confidence</span>
+                            <div class="flex justify-between text-xs"><span class="text-slate-500">Confidence</span>
                                 <span class="text-green-400">94.2%</span>
                             </div>
-                            <div class="flex justify-between text-[10px]"><span class="text-slate-500">Horizon</span>
+                            <div class="flex justify-between text-xs"><span class="text-slate-500">Horizon</span>
                                 <span class="text-white">4h /
                                     1d</span>
                             </div>
@@ -819,8 +819,8 @@
                             class="w-8 h-8 rounded-full bg-slate-800 border border-slate-600 flex items-center justify-center mb-2">
                             <i class="fas fa-satellite text-cyan-400 text-xs"></i>
                         </div>
-                        <div class="text-[9px] text-slate-400 font-bold uppercase">Raw Signal</div>
-                        <div class="text-[8px] text-slate-500 mt-1">Satellite, CV, Market</div>
+                        <div class="text-xs text-slate-400 font-bold uppercase">Raw Signal</div>
+                        <div class="text-xs text-slate-500 mt-1">Satellite, CV, Market</div>
                     </div>
                     <!-- Arrow -->
                     <div class="flex-1 h-[2px] bg-slate-800 relative top-[-20px]"></div>
@@ -831,8 +831,8 @@
                             class="w-8 h-8 rounded-full bg-slate-800 border border-purple-500/50 flex items-center justify-center mb-2">
                             <i class="fas fa-microchip text-purple-400 text-xs"></i>
                         </div>
-                        <div class="text-[9px] text-purple-400 font-bold uppercase">Physics Twin</div>
-                        <div class="text-[8px] text-slate-500 mt-1">SimPy + L2L Agent</div>
+                        <div class="text-xs text-purple-400 font-bold uppercase">Physics Twin</div>
+                        <div class="text-xs text-slate-500 mt-1">SimPy + L2L Agent</div>
                     </div>
                     <!-- Arrow -->
                     <div class="flex-1 h-[2px] bg-slate-800 relative top-[-20px]"></div>
@@ -843,8 +843,8 @@
                             class="w-8 h-8 rounded-full bg-slate-800 border border-green-500/50 flex items-center justify-center mb-2">
                             <i class="fas fa-brain text-green-400 text-xs"></i>
                         </div>
-                        <div class="text-[9px] text-green-400 font-bold uppercase">Alpha Engine</div>
-                        <div class="text-[8px] text-slate-500 mt-1">Predictor + Risk</div>
+                        <div class="text-xs text-green-400 font-bold uppercase">Alpha Engine</div>
+                        <div class="text-xs text-slate-500 mt-1">Predictor + Risk</div>
                     </div>
                     <!-- Arrow -->
                     <div class="flex-1 h-[2px] bg-slate-800 relative top-[-20px]"></div>
@@ -855,8 +855,8 @@
                             class="w-8 h-8 rounded-full bg-slate-800 border border-yellow-500/50 flex items-center justify-center mb-2">
                             <i class="fas fa-bolt text-yellow-400 text-xs"></i>
                         </div>
-                        <div class="text-[9px] text-yellow-400 font-bold uppercase">Execution</div>
-                        <div class="text-[8px] text-slate-500 mt-1">Leveraged Entry</div>
+                        <div class="text-xs text-yellow-400 font-bold uppercase">Execution</div>
+                        <div class="text-xs text-slate-500 mt-1">Leveraged Entry</div>
                     </div>
                 </div>
             </div>
