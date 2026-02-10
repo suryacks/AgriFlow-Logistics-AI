@@ -360,8 +360,7 @@
                                     <div class="flex justify-between items-center mb-1">
                                         <label class="text-xs text-slate-400 uppercase font-bold">Capital
                                             Allocation</label>
-                                        <span id="capitalLabel"
-                                            class="text-xs text-cyan-400 font-mono">$10,000</span>
+                                        <span id="capitalLabel" class="text-xs text-cyan-400 font-mono">$10,000</span>
                                     </div>
                                     <input type="range" id="capitalSlider" min="1000" max="100000" step="1000"
                                         value="10000"
@@ -401,8 +400,7 @@
 
                     <!-- Proprietary Signals Grid -->
                     <div class="border-t border-slate-700/50 pt-2 mt-1">
-                        <h4
-                            class="text-xs text-purple-400 font-bold uppercase mb-2 flex items-center justify-center">
+                        <h4 class="text-xs text-purple-400 font-bold uppercase mb-2 flex items-center justify-center">
                             <i class="fas fa-satellite-dish mr-1"></i> Live Logistics Signals
                         </h4>
                         <div class="grid grid-cols-3 gap-1">
@@ -445,6 +443,30 @@
 
         <!-- Right Column: Charts -->
         <div id="chartsColumn" class="col-span-12 xl:col-span-9 flex flex-col space-y-4">
+
+            <!-- STATS DASHBOARD (OpenClaw Style) -->
+            <div id="statsDashboard" class="grid grid-cols-4 gap-4 hidden">
+                <div class="glass-dark p-4 border border-slate-700/50 rounded flex flex-col justify-between">
+                    <div class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Current Balance</div>
+                    <div id="statBalance" class="text-2xl font-mono font-bold text-white">$10,000.00</div>
+                </div>
+                <div class="glass-dark p-4 border border-slate-700/50 rounded flex flex-col justify-between">
+                    <div class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Total P&L</div>
+                    <div id="statPnL" class="text-2xl font-mono font-bold text-green-400">+$0.00</div>
+                    <div id="statRoi" class="text-xs font-mono text-green-500/80">+0.0%</div>
+                </div>
+                <div class="glass-dark p-4 border border-slate-700/50 rounded flex flex-col justify-between">
+                    <div class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Win Rate</div>
+                    <div id="statWinRate" class="text-2xl font-mono font-bold text-white">0.0%</div>
+                    <div id="statTrades" class="text-xs text-slate-500">0 Trades</div>
+                </div>
+                <div class="glass-dark p-4 border border-slate-700/50 rounded flex flex-col justify-between">
+                    <div class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Sharpe (Est)</div>
+                    <div id="statSharpe" class="text-2xl font-mono font-bold text-purple-400">--</div>
+                    <div class="text-xs text-slate-500">Risk Adj. Return</div>
+                </div>
+            </div>
+
             <!-- Top Chart: Returns / Equity -->
             <div id="cardEquity"
                 class="glass-dark p-4 relative flex flex-col h-[600px] transition-all duration-500 ease-in-out z-30">
@@ -462,8 +484,8 @@
             <div id="cardPrice"
                 class="glass-dark p-4 relative flex flex-col h-[600px] transition-all duration-500 ease-in-out z-30">
                 <div class="flex justify-between items-center mb-2">
-                    <h4 class="text-xs font-bold text-yellow-400 uppercase"><i
-                            class="fas fa-chart-bar mr-2"></i>Price Action: Predicted vs Actual</h4>
+                    <h4 class="text-xs font-bold text-yellow-400 uppercase"><i class="fas fa-chart-bar mr-2"></i>Price
+                        Action: Predicted vs Actual</h4>
                     <button onclick="toggleChartFullscreen('cardPrice', 'priceChart')"
                         class="text-slate-500 hover:text-white transition-colors"><i class="fas fa-expand"></i></button>
                 </div>
@@ -1184,6 +1206,37 @@
                 btn.classList.remove('loading-btn'); // Stop Loading
 
                 if (data.error) { alert(data.error); return; }
+
+                // UPDATE STATS DASHBOARD
+                document.getElementById('statsDashboard').classList.remove('hidden');
+                document.getElementById('statBalance').innerText = "$" + data.final_capital.toLocaleString();
+
+                let profit = data.final_capital - parseFloat(capital);
+                let pnlEl = document.getElementById('statPnL');
+                pnlEl.innerText = (profit >= 0 ? "+" : "") + "$" + Math.round(profit).toLocaleString();
+                pnlEl.className = "text-2xl font-mono font-bold " + (profit >= 0 ? "text-green-400" : "text-red-400");
+
+                document.getElementById('statRoi').innerText = (profit >= 0 ? "+" : "") + data.roi + "%";
+                document.getElementById('statWinRate').innerText = data.win_rate + "%";
+                document.getElementById('statTrades').innerText = data.total_trades + " Trades";
+
+                // Est Sharpe: Avg Return / Std Dev of Return (Daily)
+                // We'll approx. it from ROI and Volatility (proxy)
+                // Or just use a random "good" number for demo if data insufficient
+                // Let's compute approx daily return mean/std from curve
+                if (data.curve.length > 10) {
+                    let returns = [];
+                    for (let i = 1; i < data.curve.length; i++) {
+                        let r = (data.curve[i].equity - data.curve[i - 1].equity) / data.curve[i - 1].equity;
+                        returns.push(r);
+                    }
+                    let mean = returns.reduce((a, b) => a + b, 0) / returns.length;
+                    let std = Math.sqrt(returns.map(x => Math.pow(x - mean, 2)).reduce((a, b) => a + b, 0) / returns.length);
+                    let sharpe = (mean / (std || 1)) * Math.sqrt(252);
+                    document.getElementById('statSharpe').innerText = sharpe.toFixed(2);
+                } else {
+                    document.getElementById('statSharpe').innerText = "N/A";
+                }
 
                 document.getElementById('backtestStats').classList.remove('opacity-50');
                 document.getElementById('btAcc').innerText = data.accuracy + "%";

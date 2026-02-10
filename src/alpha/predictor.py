@@ -390,8 +390,10 @@ class AgriAlphaPredictor:
         
         correct = 0
         total = 0
+        wins = 0
         capital = float(initial_capital)
         portfolio = []
+        trades_log = []
         
         # PROPRIETARY LEVERAGE
         LEVERAGE = 20.0
@@ -449,11 +451,22 @@ class AgriAlphaPredictor:
                     # Cost (0.02% slippage on notional)
                     cost = position_value * 0.0002 
                     
-                    capital += (gross_pnl - cost)
+                    net_pnl = gross_pnl - cost
+                    capital += net_pnl
                     
                     if (pred_return > 0 and actual_return > 0) or (pred_return < 0 and actual_return < 0):
                         correct += 1
+                    
+                    if net_pnl > 0: wins += 1
                     total += 1
+                    
+                    trades_log.append({
+                        "date": curr_date.strftime('%Y-%m-%d'),
+                        "type": "LONG" if signal > 0 else "SHORT",
+                        "price": round(prev_price, 2),
+                        "pnl": round(net_pnl, 2),
+                        "roi": round((net_pnl / position_value) * 100, 2)
+                    })
                 
                 # Margin Call Check
                 if capital <= 0:
@@ -472,11 +485,14 @@ class AgriAlphaPredictor:
                 pass
                 
         accuracy = (correct / total * 100) if total > 0 else 0
+        win_rate = (wins / total * 100) if total > 0 else 0
         
         return {
             "accuracy": round(accuracy, 1),
+            "win_rate": round(win_rate, 1),
             "final_capital": round(capital, 2),
             "roi": round(((capital - initial_capital)/initial_capital)*100, 2),
             "total_trades": total,
+            "trades": trades_log,
             "curve": portfolio
         }
