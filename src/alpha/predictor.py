@@ -230,7 +230,8 @@ class AgriAlphaPredictor:
         trade_count = 0
         
         import random
-        random.seed(42) # Stability for demo
+        # Seed with the date string to ensure different results per day
+        random.seed(target_dt_str) 
         
         for i, t_label in enumerate(times):
             # 1. Trend
