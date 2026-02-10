@@ -245,6 +245,14 @@ class AgriAlphaPredictor:
             if "11:00" <= t_label <= "11:30" and sim_score > 60:
                  noise -= current_p * 0.003
             
+            # Day of Week Seasonality
+            # Monday (0) = Volatility, Friday (4) = Profit Taking Dip
+            dow = target_dt.weekday()
+            if dow == 0: # Monday Volatility
+                noise *= 1.2
+            elif dow == 4 and "14:00" <= t_label: # Friday Afternoon Dip
+                noise -= current_p * 0.001
+
             pred_val = current_p + noise
             
             # 4. Confidence Band (Expands over time)
